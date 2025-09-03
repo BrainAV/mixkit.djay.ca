@@ -13,11 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     masterGain.connect(analyser);
     analyser.connect(audioCtx.destination);
 
+    const seekTooltip = document.getElementById('seek-tooltip');
+
     // --- Deck Class ---
     // A class to manage the state and functionality of a single deck
     class Deck {
         constructor(deckId) {
             this.deckId = deckId;
+            this.deckElement = document.getElementById(`deck${deckId}`);
             this.audioBuffer = null;
             this.sourceNode = null;
             this.gainNode = audioCtx.createGain();
@@ -27,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.startTime = 0;
             this.pauseOffset = 0;
             this.playbackRate = 1.0;
+            this.isScrubbing = false;
 
             // Connect nodes: individual deck gain -> crossfader gain -> master gain
             this.gainNode.connect(this.crossfaderGainNode);
@@ -40,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.volumeSlider = document.getElementById(`volume-${deckId}`);
             this.trackInfo = document.getElementById(`track-info-${deckId}`);
             this.progressBar = document.getElementById(`progress-${deckId}`);
+            this.progressContainer = document.getElementById(`progress-container-${deckId}`);
             this.currentTimeDisplay = document.getElementById(`time-current-${deckId}`);
             this.totalTimeDisplay = document.getElementById(`time-total-${deckId}`);
             this.waveformCanvas = document.getElementById(`waveform-${deckId}`);
@@ -63,13 +68,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.gainNode.gain.value = e.target.value;
             });
             this.tempoSlider.addEventListener('input', this.updateTempo.bind(this));
+
+            // Scrubbing listeners
+            this.progressContainer.addEventListener('mousedown', this.handleScrubbingStart.bind(this));
+            this.progressContainer.addEventListener('mousemove', this.handleScrubbingMove.bind(this));
+            this.progressContainer.addEventListener('mouseup', this.handleScrubbingEnd.bind(this));
+            this.progressContainer.addEventListener('mouseleave', this.handleScrubbingEnd.bind(this));
+
+            // Drag and Drop Listeners
+            this.deckElement.addEventListener('dragover', this.handleDragOver.bind(this));
+            this.deckElement.addEventListener('dragleave', this.handleDragLeave.bind(this));
+            this.deckElement.addEventListener('drop', this.handleDrop.bind(this));
         }
 
         // --- Load Audio File ---
-        async loadFile(event) {
+        loadFile(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if (file) {
+                this.loadTrack(file);
+            }
+        }
 
+        async loadTrack(file) {
+            if (!file.type.startsWith('audio/')) {
+                alert('Please drop a valid audio file.');
+                return;
+            }
             // Reset previous track state
             this.stop();
             this.trackInfo.textContent = `Loading: ${file.name}...`;
@@ -288,6 +312,87 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log(`Could not read metadata for ${file.name}:`, error.type, error.info);
                 }
             });
+        }
+
+        // --- Scrubbing/Seeking Methods ---
+        handleScrubbingStart(event) {
+            if (!this.audioBuffer) return;
+            this.isScrubbing = true;
+            // Immediately update position on first click
+            this.handleScrubbingMove(event);
+        }
+
+        handleScrubbingMove(event) {
+            if (!this.isScrubbing || !this.audioBuffer) return;
+
+            const rect = this.progressContainer.getBoundingClientRect();
+            const percent = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+            const seekTime = percent * this.audioBuffer.duration;
+
+            // Update progress bar and time display visually without changing audio
+            this.progressBar.value = percent * 100;
+            this.currentTimeDisplay.textContent = this.formatTime(seekTime);
+
+            // Update and show tooltip
+            seekTooltip.style.left = `${event.pageX}px`;
+            seekTooltip.style.top = `${event.pageY - 35}px`; // Position above cursor
+            seekTooltip.textContent = this.formatTime(seekTime);
+            seekTooltip.style.display = 'block';
+        }
+
+        handleScrubbingEnd(event) {
+            if (!this.isScrubbing) return;
+            
+            this.isScrubbing = false;
+            seekTooltip.style.display = 'none';
+
+            const rect = this.progressContainer.getBoundingClientRect();
+            const percent = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+            const seekTime = percent * this.audioBuffer.duration;
+            
+            this.seek(seekTime);
+        }
+
+        seek(time) {
+            if (!this.audioBuffer) return;
+
+            this.pauseOffset = time;
+            
+            // If the track is currently playing, stop it and restart from the new position
+            if (this.isPlaying) {
+                // We need to stop the old source and create a new one
+                if(this.sourceNode) {
+                    this.sourceNode.stop();
+                }
+                this.play();
+            }
+            // If paused, the new pauseOffset will be picked up on the next play.
+            // We just need to update the UI to reflect the new position.
+            else {
+                this.progressBar.value = (this.pauseOffset / this.audioBuffer.duration) * 100;
+                this.currentTimeDisplay.textContent = this.formatTime(this.pauseOffset);
+            }
+        }
+
+        // --- Drag and Drop Handlers ---
+        handleDragOver(event) {
+            event.preventDefault();
+            this.deckElement.classList.add('drag-over');
+        }
+
+        handleDragLeave(event) {
+            event.preventDefault();
+            this.deckElement.classList.remove('drag-over');
+        }
+
+        handleDrop(event) {
+            event.preventDefault();
+            this.deckElement.classList.remove('drag-over');
+            
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                this.loadTrack(file);
+            }
         }
     }
 
