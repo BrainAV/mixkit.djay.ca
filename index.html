@@ -9,6 +9,7 @@
 <body>
 
     <div id="app-container">
+    <div id="seek-tooltip" class="seek-tooltip">00:00</div>
         <h1>DJay.ca MixKit</h1>
 
         <div class="decks-container">
@@ -23,7 +24,9 @@
                 <div class="time-display">
                     <span id="time-current-1">00:00</span> / <span id="time-total-1">00:00</span>
                 </div>
-                <progress id="progress-1" value="0" max="100"></progress>
+                <div class="progress-bar-container" id="progress-container-1">
+                    <progress id="progress-1" value="0" max="100"></progress>
+                </div>
                 <div class="controls">
                     <input type="file" id="file-input-1" accept=".mp3" class="file-input">
                     <button id="play-pause-btn-1">Play</button>
@@ -48,7 +51,9 @@
                 <div class="time-display">
                     <span id="time-current-2">00:00</span> / <span id="time-total-2">00:00</span>
                 </div>
-                <progress id="progress-2" value="0" max="100"></progress>
+                <div class="progress-bar-container" id="progress-container-2">
+                    <progress id="progress-2" value="0" max="100"></progress>
+                </div>
                 <div class="controls">
                     <input type="file" id="file-input-2" accept=".mp3" class="file-input">
                     <button id="play-pause-btn-2">Play</button>
