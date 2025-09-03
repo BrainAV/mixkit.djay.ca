@@ -1,33 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Mini DJ</title>
-<style>
-  body {font-family: Arial, sans-serif; margin: 2rem;}
-  #controls button{margin-right:.5rem;}
-  #progress{width:100%;}
-  #volume{width:100px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJay.ca MixKit</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-<h1>🛠️ Mini DJ (Browser‑Only)</h1>
 
-<input type="file" id="fileInput" accept=".mp3">
-<br><br>
+    <div id="app-container">
+        <h1>DJay.ca MixKit</h1>
 
-<div id="controls">
-  <button id="playBtn">Play</button>
-  <button id="pauseBtn">Pause</button>
-  <button id="stopBtn">Stop</button>
-  Volume: <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
-</div>
+        <div class="decks-container">
+            <!-- DECK 1 -->
+            <div class="deck" id="deck1">
+                <h2>Deck 1</h2>
+                <div class="track-info" id="track-info-1">No track loaded</div>
+                <div class="waveform-container">
+                    <canvas id="waveform-1"></canvas>
+                </div>
+                <div class="time-display">
+                    <span id="time-current-1">00:00</span> / <span id="time-total-1">00:00</span>
+                </div>
+                <progress id="progress-1" value="0" max="100"></progress>
+                <div class="controls">
+                    <input type="file" id="file-input-1" accept=".mp3" class="file-input">
+                    <button id="play-pause-btn-1">Play</button>
+                    <button id="stop-btn-1">Stop</button>
+                    <button id="loop-btn-1">Loop: Off</button>
+                    <label>Volume:</label>
+                    <input type="range" id="volume-1" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
+                </div>
+            </div>
 
-<br>
-<progress id="progress" value="0" max="100"></progress>
-<span id="timeInfo">00:00 / 00:00</span>
+            <!-- DECK 2 -->
+            <div class="deck" id="deck2">
+                <h2>Deck 2</h2>
+                <div class="track-info" id="track-info-2">No track loaded</div>
+                <div class="waveform-container">
+                    <canvas id="waveform-2"></canvas>
+                </div>
+                <div class="time-display">
+                    <span id="time-current-2">00:00</span> / <span id="time-total-2">00:00</span>
+                </div>
+                <progress id="progress-2" value="0" max="100"></progress>
+                <div class="controls">
+                    <input type="file" id="file-input-2" accept=".mp3" class="file-input">
+                    <button id="play-pause-btn-2">Play</button>
+                    <button id="stop-btn-2">Stop</button>
+                    <button id="loop-btn-2">Loop: Off</button>
+                    <label>Volume:</label>
+                    <input type="range" id="volume-2" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
+                </div>
+            </div>
+        </div>
 
-<script src="app.js"></script>
+        <div class="master-controls">
+            <h2>Master Controls</h2>
+            <div class="crossfader-container">
+                <label>Crossfader</label>
+                <input type="range" id="crossfader" min="-1" max="1" step="0.01" value="0">
+            </div>
+            <div class="master-volume-container">
+                <label>Master Volume</label>
+                <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
+            </div>
+            <div class="utility-controls">
+                <button id="export-btn">Export Session</button>
+                <button id="import-btn">Import Session</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
