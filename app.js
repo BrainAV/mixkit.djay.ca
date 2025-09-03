@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.progressBar = document.getElementById(`progress-${deckId}`);
             this.currentTimeDisplay = document.getElementById(`time-current-${deckId}`);
             this.totalTimeDisplay = document.getElementById(`time-total-${deckId}`);
+            this.waveformCanvas = document.getElementById(`waveform-${deckId}`);
 
             // Initially disable controls
             this.playPauseBtn.disabled = true;
@@ -66,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 this.trackInfo.textContent = file.name;
                 this.totalTimeDisplay.textContent = this.formatTime(this.audioBuffer.duration);
+                this.drawWaveform();
                 
                 // Enable controls
                 this.playPauseBtn.disabled = false;
@@ -166,6 +168,51 @@ document.addEventListener('DOMContentLoaded', () => {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
             return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        drawWaveform() {
+            if (!this.audioBuffer || !this.waveformCanvas) return;
+
+            const canvas = this.waveformCanvas;
+            const ctx = canvas.getContext('2d');
+            // Get the raw audio data from the first channel
+            const channelData = this.audioBuffer.getChannelData(0);
+            
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+
+            // Clear the canvas before drawing
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Determine how many samples we need to average for each pixel on the canvas
+            const samplesPerPixel = Math.floor(channelData.length / canvasWidth);
+            const filteredData = [];
+
+            // Downsample the audio data to fit the canvas width
+            for (let i = 0; i < canvasWidth; i++) {
+                const blockStart = samplesPerPixel * i;
+                let sum = 0;
+                for (let j = 0; j < samplesPerPixel; j++) {
+                    // Sum the absolute values to get the amplitude
+                    sum += Math.abs(channelData[blockStart + j] || 0);
+                }
+                filteredData.push(sum / samplesPerPixel);
+            }
+
+            // Find the maximum value in the filtered data to scale the waveform vertically
+            const maxVal = Math.max(...filteredData);
+            const scale = canvasHeight / 2 / maxVal;
+
+            // Set the drawing style
+            ctx.fillStyle = '#3498db'; // A nice blue color for the waveform
+            ctx.beginPath();
+
+            // Draw the waveform as a series of vertical lines from the center
+            for (let i = 0; i < filteredData.length; i++) {
+                const val = filteredData[i] * scale;
+                const y = (canvasHeight - val) / 2;
+                ctx.fillRect(i, y, 1, val);
+            }
         }
     }
 
