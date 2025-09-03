@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.isLooping = false;
             this.startTime = 0;
             this.pauseOffset = 0;
+            this.playbackRate = 1.0;
 
             // Connect nodes: individual deck gain -> crossfader gain -> master gain
             this.gainNode.connect(this.crossfaderGainNode);
@@ -35,12 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
             this.currentTimeDisplay = document.getElementById(`time-current-${deckId}`);
             this.totalTimeDisplay = document.getElementById(`time-total-${deckId}`);
             this.waveformCanvas = document.getElementById(`waveform-${deckId}`);
+            this.tempoSlider = document.getElementById(`tempo-slider-${deckId}`);
+            this.tempoDisplay = document.getElementById(`tempo-display-${deckId}`);
 
             // Initially disable controls
             this.playPauseBtn.disabled = true;
             this.stopBtn.disabled = true;
             this.loopBtn.disabled = true;
             this.volumeSlider.disabled = true;
+            this.tempoSlider.disabled = true;
 
             // --- Event Listeners ---
             this.fileInput.addEventListener('change', this.loadFile.bind(this));
@@ -50,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.volumeSlider.addEventListener('input', (e) => {
                 this.gainNode.gain.value = e.target.value;
             });
+            this.tempoSlider.addEventListener('input', this.updateTempo.bind(this));
         }
 
         // --- Load Audio File ---
@@ -74,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.stopBtn.disabled = false;
                 this.loopBtn.disabled = false;
                 this.volumeSlider.disabled = false;
+                this.tempoSlider.disabled = false;
 
             } catch (err) {
                 this.trackInfo.textContent = 'Error decoding audio file.';
@@ -100,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.sourceNode = audioCtx.createBufferSource();
             this.sourceNode.buffer = this.audioBuffer;
             this.sourceNode.loop = this.isLooping;
+            this.sourceNode.playbackRate.value = this.playbackRate; // Apply tempo
             this.sourceNode.connect(this.gainNode);
 
             // Calculate the correct offset to resume from
@@ -173,6 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
         drawWaveform() {
             if (!this.audioBuffer || !this.waveformCanvas) return;
 
+            // Reset tempo slider and display when a new track is loaded
+            this.tempoSlider.value = 0;
+            this.tempoDisplay.textContent = '+0.0%';
+            this.playbackRate = 1.0;
+
             const canvas = this.waveformCanvas;
             const ctx = canvas.getContext('2d');
             // Get the raw audio data from the first channel
@@ -213,6 +225,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const y = (canvasHeight - val) / 2;
                 ctx.fillRect(i, y, 1, val);
             }
+        }
+
+        updateTempo(event) {
+            const tempoPercentage = parseFloat(event.target.value);
+            // Convert slider value (-8 to +8) to playbackRate
+            this.playbackRate = 1.0 + (tempoPercentage / 100.0);
+
+            if (this.sourceNode) {
+                this.sourceNode.playbackRate.value = this.playbackRate;
+            }
+
+            // Update display
+            const sign = tempoPercentage >= 0 ? '+' : '';
+            this.tempoDisplay.textContent = `${sign}${tempoPercentage.toFixed(1)}%`;
         }
     }
 
