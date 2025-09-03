@@ -183,3 +183,37 @@ input[type="range"] {
     margin-bottom: 1rem;
     border: 1px solid #444;
 }
+
+/* Seek/Scrub Styles */
+.progress-bar-container {
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+/* Override default progress margin since the container has it now */
+progress {
+    width: 100%;
+    height: 10px;
+    margin-bottom: 0; 
+    pointer-events: none; /* Clicks should be handled by the container */
+}
+
+.seek-tooltip {
+    position: absolute;
+    display: none; /* Hidden by default */
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    pointer-events: none; /* Tooltip should not capture mouse events */
+    z-index: 100;
+    transform: translateX(-50%); /* Center the tooltip horizontally on the cursor */
+    white-space: nowrap;
+}
+
+/* Drag and Drop Styling */
+.deck.drag-over {
+    border-color: #3498db;
+    border-style: dashed;
+}
