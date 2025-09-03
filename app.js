@@ -4,7 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     // Create a master gain node to control the overall volume
     const masterGain = audioCtx.createGain();
-    masterGain.connect(audioCtx.destination);
+    
+    // Create an analyser node for the spectrum visualizer
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256; // Smaller size for performance
+    
+    // Connect the audio graph: Master Gain -> Analyser -> Destination (speakers)
+    masterGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
 
     // --- Deck Class ---
     // A class to manage the state and functionality of a single deck
@@ -38,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.waveformCanvas = document.getElementById(`waveform-${deckId}`);
             this.tempoSlider = document.getElementById(`tempo-slider-${deckId}`);
             this.tempoDisplay = document.getElementById(`tempo-display-${deckId}`);
+            this.albumArtElement = document.getElementById(`album-art-${deckId}`);
 
             // Initially disable controls
             this.playPauseBtn.disabled = true;
@@ -65,12 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset previous track state
             this.stop();
             this.trackInfo.textContent = `Loading: ${file.name}...`;
+            this.loadMetadata(file);
             
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 this.audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
                 
-                this.trackInfo.textContent = file.name;
+                // If metadata didn't provide a title, stick with the filename
+                if (this.trackInfo.textContent === `Loading: ${file.name}...`) {
+                    this.trackInfo.textContent = file.name;
+                }
                 this.totalTimeDisplay.textContent = this.formatTime(this.audioBuffer.duration);
                 this.drawWaveform();
                 
@@ -240,6 +252,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const sign = tempoPercentage >= 0 ? '+' : '';
             this.tempoDisplay.textContent = `${sign}${tempoPercentage.toFixed(1)}%`;
         }
+
+        loadMetadata(file) {
+            // Reset artwork and info for the new track
+            this.albumArtElement.style.display = 'none';
+            this.albumArtElement.src = '';
+            
+            if (!window.jsmediatags) {
+                console.error("jsmediatags library not found.");
+                return;
+            }
+
+            window.jsmediatags.read(file, {
+                onSuccess: (tag) => {
+                    const tags = tag.tags;
+                    
+                    if (tags.title && tags.artist) {
+                        this.trackInfo.textContent = `${tags.artist} - ${tags.title}`;
+                    } else if (tags.title) {
+                        this.trackInfo.textContent = tags.title;
+                    }
+                    // If no title, the filename will be kept from the loadFile method.
+
+                    if (tags.picture) {
+                        const { data, format } = tags.picture;
+                        let base64String = "";
+                        for (let i = 0; i < data.length; i++) {
+                            base64String += String.fromCharCode(data[i]);
+                        }
+                        this.albumArtElement.src = `data:${format};base64,${window.btoa(base64String)}`;
+                        this.albumArtElement.style.display = 'block';
+                    }
+                },
+                onError: (error) => {
+                    console.log(`Could not read metadata for ${file.name}:`, error.type, error.info);
+                }
+            });
+        }
     }
 
     // --- Instantiate Decks ---
@@ -265,6 +314,40 @@ document.addEventListener('DOMContentLoaded', () => {
     crossfader.addEventListener('input', setupCrossfader);
     // Initialize crossfader gains
     setupCrossfader();
+
+    // --- Spectrum Analyzer ---
+    const spectrumCanvas = document.getElementById('master-spectrum');
+    const spectrumCtx = spectrumCanvas.getContext('2d');
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function drawSpectrum() {
+        requestAnimationFrame(drawSpectrum);
+
+        analyser.getByteFrequencyData(dataArray);
+
+        spectrumCtx.fillStyle = '#000';
+        spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+
+        const barWidth = (spectrumCanvas.width / bufferLength) * 2;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i] / 2;
+            
+            // Simple color gradient from blue to red
+            const r = 70 + (barHeight * 1.5);
+            const g = 100;
+            const b = 250 - (barHeight);
+
+            spectrumCtx.fillStyle = `rgb(${r},${g},${b})`;
+            spectrumCtx.fillRect(x, spectrumCanvas.height - barHeight, barWidth, barHeight);
+
+            x += barWidth + 1;
+        }
+    }
+    drawSpectrum();
+
 
     // --- Utility Controls (Export/Import) ---
     const exportBtn = document.getElementById('export-btn');
