@@ -1,103 +1,290 @@
-// ---------- 1️⃣ Set up AudioContext ----------
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let sourceNode;          // the node that plays the buffer
-let trackBuffer;         // decoded PCM data
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Audio Context Setup ---
+    // Create a single AudioContext for the entire application
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Create a master gain node to control the overall volume
+    const masterGain = audioCtx.createGain();
+    masterGain.connect(audioCtx.destination);
 
-// ---------- 2️⃣ UI elements ----------
-const fileInput   = document.getElementById('fileInput');
-const playBtn     = document.getElementById('playBtn');
-const pauseBtn    = document.getElementById('pauseBtn');
-const stopBtn     = document.getElementById('stopBtn');
-const volumeSlider= document.getElementById('volume');
-const progressBar = document.getElementById('progress');
-const timeInfo    = document.getElementById('timeInfo');
+    // --- Deck Class ---
+    // A class to manage the state and functionality of a single deck
+    class Deck {
+        constructor(deckId) {
+            this.deckId = deckId;
+            this.audioBuffer = null;
+            this.sourceNode = null;
+            this.gainNode = audioCtx.createGain();
+            this.crossfaderGainNode = audioCtx.createGain();
+            this.isPlaying = false;
+            this.isLooping = false;
+            this.startTime = 0;
+            this.pauseOffset = 0;
 
-let gainNode = audioCtx.createGain();
-gainNode.gain.value = volumeSlider.value;
-gainNode.connect(audioCtx.destination);
+            // Connect nodes: individual deck gain -> crossfader gain -> master gain
+            this.gainNode.connect(this.crossfaderGainNode);
+            this.crossfaderGainNode.connect(masterGain);
 
-let startTime = 0;   // when the track started playing
-let pauseOffset = 0;
+            // --- UI Elements ---
+            this.fileInput = document.getElementById(`file-input-${deckId}`);
+            this.playPauseBtn = document.getElementById(`play-pause-btn-${deckId}`);
+            this.stopBtn = document.getElementById(`stop-btn-${deckId}`);
+            this.loopBtn = document.getElementById(`loop-btn-${deckId}`);
+            this.volumeSlider = document.getElementById(`volume-${deckId}`);
+            this.trackInfo = document.getElementById(`track-info-${deckId}`);
+            this.progressBar = document.getElementById(`progress-${deckId}`);
+            this.currentTimeDisplay = document.getElementById(`time-current-${deckId}`);
+            this.totalTimeDisplay = document.getElementById(`time-total-${deckId}`);
 
-// ---------- 3️⃣ Load a file ----------
-fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+            // Initially disable controls
+            this.playPauseBtn.disabled = true;
+            this.stopBtn.disabled = true;
+            this.loopBtn.disabled = true;
+            this.volumeSlider.disabled = true;
 
-    const arrayBuffer = await file.arrayBuffer();
-    try {
-        trackBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-        console.log(`Loaded ${trackBuffer.duration.toFixed(1)}s`);
-        resetPlayer();          // prepare for a fresh play
-    } catch (err) {
-        alert('Error decoding audio: ' + err.message);
+            // --- Event Listeners ---
+            this.fileInput.addEventListener('change', this.loadFile.bind(this));
+            this.playPauseBtn.addEventListener('click', this.togglePlayPause.bind(this));
+            this.stopBtn.addEventListener('click', this.stop.bind(this));
+            this.loopBtn.addEventListener('click', this.toggleLoop.bind(this));
+            this.volumeSlider.addEventListener('input', (e) => {
+                this.gainNode.gain.value = e.target.value;
+            });
+        }
+
+        // --- Load Audio File ---
+        async loadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Reset previous track state
+            this.stop();
+            this.trackInfo.textContent = `Loading: ${file.name}...`;
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                this.audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                
+                this.trackInfo.textContent = file.name;
+                this.totalTimeDisplay.textContent = this.formatTime(this.audioBuffer.duration);
+                
+                // Enable controls
+                this.playPauseBtn.disabled = false;
+                this.stopBtn.disabled = false;
+                this.loopBtn.disabled = false;
+                this.volumeSlider.disabled = false;
+
+            } catch (err) {
+                this.trackInfo.textContent = 'Error decoding audio file.';
+                console.error(`Error for deck ${this.deckId}:`, err);
+            }
+        }
+
+        togglePlayPause() {
+            // If the audio context is suspended (due to browser autoplay policies), resume it
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (this.isPlaying) {
+                this.pause();
+            } else {
+                this.play();
+            }
+        }
+
+        play() {
+            if (!this.audioBuffer || this.isPlaying) return;
+
+            this.sourceNode = audioCtx.createBufferSource();
+            this.sourceNode.buffer = this.audioBuffer;
+            this.sourceNode.loop = this.isLooping;
+            this.sourceNode.connect(this.gainNode);
+
+            // Calculate the correct offset to resume from
+            const offset = this.pauseOffset % this.audioBuffer.duration;
+            this.sourceNode.start(0, offset);
+
+            this.startTime = audioCtx.currentTime - offset;
+            this.isPlaying = true;
+            this.playPauseBtn.textContent = 'Pause';
+            
+            // Start the animation frame loop for progress updates
+            requestAnimationFrame(this.updateProgress.bind(this));
+        }
+
+        pause() {
+            if (!this.sourceNode || !this.isPlaying) return;
+
+            this.sourceNode.stop(); // This destroys the source node
+            this.sourceNode = null; // Discard the old node
+            
+            // Save our position
+            this.pauseOffset = audioCtx.currentTime - this.startTime;
+            this.isPlaying = false;
+            this.playPauseBtn.textContent = 'Play';
+        }
+
+        stop() {
+            if (this.sourceNode) {
+                this.sourceNode.stop();
+                this.sourceNode = null;
+            }
+            this.isPlaying = false;
+            this.pauseOffset = 0;
+            this.startTime = 0;
+            this.playPauseBtn.textContent = 'Play';
+            this.progressBar.value = 0;
+            this.currentTimeDisplay.textContent = '00:00';
+        }
+
+        toggleLoop() {
+            this.isLooping = !this.isLooping;
+            if (this.sourceNode) {
+                this.sourceNode.loop = this.isLooping;
+            }
+            this.loopBtn.textContent = `Loop: ${this.isLooping ? 'On' : 'Off'}`;
+            this.loopBtn.style.backgroundColor = this.isLooping ? '#4CAF50' : '#555';
+        }
+
+        updateProgress() {
+            if (!this.isPlaying) return;
+
+            const elapsed = this.isLooping
+                ? (audioCtx.currentTime - this.startTime) % this.audioBuffer.duration
+                : audioCtx.currentTime - this.startTime;
+
+            if (elapsed >= this.audioBuffer.duration && !this.isLooping) {
+                this.stop();
+            } else {
+                this.progressBar.value = (elapsed / this.audioBuffer.duration) * 100;
+                this.currentTimeDisplay.textContent = this.formatTime(elapsed);
+                requestAnimationFrame(this.updateProgress.bind(this));
+            }
+        }
+
+        formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
     }
+
+    // --- Instantiate Decks ---
+    const deck1 = new Deck(1);
+    const deck2 = new Deck(2);
+
+    // --- Master Controls ---
+    const masterVolumeSlider = document.getElementById('master-volume');
+    masterVolumeSlider.addEventListener('input', (e) => {
+        masterGain.gain.value = e.target.value;
+    });
+
+    const crossfader = document.getElementById('crossfader');
+    const setupCrossfader = () => {
+        const value = parseFloat(crossfader.value);
+        // Use an equal-power crossfading curve for smooth transition
+        const gain1 = Math.cos((value + 1) * 0.25 * Math.PI);
+        const gain2 = Math.cos((1 - value) * 0.25 * Math.PI);
+        
+        deck1.crossfaderGainNode.gain.value = gain1;
+        deck2.crossfaderGainNode.gain.value = gain2;
+    };
+    crossfader.addEventListener('input', setupCrossfader);
+    // Initialize crossfader gains
+    setupCrossfader();
+
+    // --- Utility Controls (Export/Import) ---
+    const exportBtn = document.getElementById('export-btn');
+    const importBtn = document.getElementById('import-btn');
+
+    function exportSession() {
+        const sessionState = {
+            deck1: {
+                trackName: deck1.audioBuffer ? deck1.fileInput.files[0].name : null,
+                volume: deck1.volumeSlider.value,
+                isLooping: deck1.isLooping,
+            },
+            deck2: {
+                trackName: deck2.audioBuffer ? deck2.fileInput.files[0].name : null,
+                volume: deck2.volumeSlider.value,
+                isLooping: deck2.isLooping,
+            },
+            master: {
+                volume: masterVolumeSlider.value,
+                crossfader: crossfader.value,
+            },
+        };
+
+        const jsonString = JSON.stringify(sessionState, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'djay_session.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function importSession() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const sessionState = JSON.parse(event.target.result);
+                    applySessionState(sessionState);
+                } catch (err) {
+                    alert('Error: Could not parse session file.');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    function applySessionState(state) {
+        // Apply Deck 1 state
+        if (state.deck1) {
+            deck1.volumeSlider.value = state.deck1.volume;
+            deck1.gainNode.gain.value = state.deck1.volume;
+            if (deck1.isLooping !== state.deck1.isLooping) {
+                deck1.toggleLoop();
+            }
+            if (state.deck1.trackName && !deck1.audioBuffer) {
+                deck1.trackInfo.textContent = `Please load: ${state.deck1.trackName}`;
+            }
+        }
+
+        // Apply Deck 2 state
+        if (state.deck2) {
+            deck2.volumeSlider.value = state.deck2.volume;
+            deck2.gainNode.gain.value = state.deck2.volume;
+            if (deck2.isLooping !== state.deck2.isLooping) {
+                deck2.toggleLoop();
+            }
+            if (state.deck2.trackName && !deck2.audioBuffer) {
+                deck2.trackInfo.textContent = `Please load: ${state.deck2.trackName}`;
+            }
+        }
+
+        // Apply Master state
+        if (state.master) {
+            masterVolumeSlider.value = state.master.volume;
+            masterGain.gain.value = state.master.volume;
+            crossfader.value = state.master.crossfader;
+            setupCrossfader(); // Apply crossfader gain changes
+        }
+    }
+
+    exportBtn.addEventListener('click', exportSession);
+    importBtn.addEventListener('click', importSession);
 });
-
-// ---------- 4️⃣ Playback controls ----------
-function playTrack() {
-    if (!trackBuffer) return;
-    sourceNode = audioCtx.createBufferSource();
-    sourceNode.buffer = trackBuffer;
-    sourceNode.connect(gainNode);
-
-    // If we paused before, resume from that point
-    const offset = pauseOffset % trackBuffer.duration;
-    startTime = audioCtx.currentTime - offset;
-
-    sourceNode.start(0, offset);
-    requestAnimationFrame(updateProgress);   // kick off UI updates
-}
-
-function pauseTrack() {
-    if (!sourceNode) return;
-    sourceNode.stop();
-    pauseOffset = audioCtx.currentTime - startTime;
-}
-
-function stopTrack() {
-    if (sourceNode) {
-        sourceNode.stop();
-        sourceNode.disconnect();
-    }
-    pauseOffset = 0;
-    progressBar.value = 0;
-    timeInfo.textContent = '00:00 / ' + formatTime(trackBuffer.duration);
-}
-
-// ---------- 5️⃣ UI event listeners ----------
-playBtn.addEventListener('click', playTrack);
-pauseBtn.addEventListener('click', pauseTrack);
-stopBtn.addEventListener('click', stopTrack);
-
-volumeSlider.addEventListener('input', () => {
-    gainNode.gain.value = volumeSlider.value;
-});
-
-// ---------- 6️⃣ Progress / Time display ----------
-function updateProgress() {
-    if (!sourceNode) return;
-
-    const elapsed = audioCtx.currentTime - startTime;
-    if (elapsed >= trackBuffer.duration) {
-        stopTrack();
-        return;
-    }
-
-    progressBar.value = (elapsed / trackBuffer.duration) * 100;
-    timeInfo.textContent = `${formatTime(elapsed)} / ${formatTime(trackBuffer.duration)}`;
-
-    requestAnimationFrame(updateProgress);
-}
-
-function formatTime(sec) {
-    const m = Math.floor(sec / 60).toString().padStart(2, '0');
-    const s = Math.floor(sec % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-}
-
-// ---------- 7️⃣ Reset for a new track ----------
-function resetPlayer() {
-    stopTrack();
-    playBtn.disabled = false;
-}
