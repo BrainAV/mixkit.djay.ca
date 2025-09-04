@@ -28,15 +28,27 @@
                     <progress id="progress-1" value="0" max="100"></progress>
                 </div>
                 <div class="controls">
-                    <input type="file" id="file-input-1" accept=".mp3" class="file-input">
-                    <button id="play-pause-btn-1">Play</button>
-                    <button id="stop-btn-1">Stop</button>
-                    <button id="loop-btn-1">Loop: Off</button>
-                    <label>Volume:</label>
-                    <input type="range" id="volume-1" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
-                    <label>Tempo:</label>
-                    <input type="range" id="tempo-slider-1" min="-8" max="8" step="0.1" value="0" class="tempo-slider">
-                    <span id="tempo-display-1" class="tempo-display">+0.0%</span>
+                    <div class="control-row file-input-row">
+                        <input type="file" id="file-input-1" accept=".mp3" class="file-input">
+                    </div>
+                    <div class="control-row main-controls-row">
+                        <button id="play-pause-btn-1">Play</button>
+                        <button id="stop-btn-1">Stop</button>
+                        <button id="loop-btn-1">Loop: Off</button>
+                        <div class="vu-meter-container">
+                            <canvas id="vu-meter-L-1" width="10" height="50"></canvas>
+                            <canvas id="vu-meter-R-1" width="10" height="50"></canvas>
+                        </div>
+                    </div>
+                    <div class="control-row slider-row">
+                        <label>Volume:</label>
+                        <input type="range" id="volume-1" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
+                    </div>
+                    <div class="control-row slider-row">
+                        <label>Tempo:</label>
+                        <input type="range" id="tempo-slider-1" min="-8" max="8" step="0.1" value="0" class="tempo-slider">
+                        <span id="tempo-display-1" class="tempo-display">+0.0%</span>
+                    </div>
                 </div>
             </div>
 
@@ -55,15 +67,27 @@
                     <progress id="progress-2" value="0" max="100"></progress>
                 </div>
                 <div class="controls">
-                    <input type="file" id="file-input-2" accept=".mp3" class="file-input">
-                    <button id="play-pause-btn-2">Play</button>
-                    <button id="stop-btn-2">Stop</button>
-                    <button id="loop-btn-2">Loop: Off</button>
-                    <label>Volume:</label>
-                    <input type="range" id="volume-2" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
-                    <label>Tempo:</label>
-                    <input type="range" id="tempo-slider-2" min="-8" max="8" step="0.1" value="0" class="tempo-slider">
-                    <span id="tempo-display-2" class="tempo-display">+0.0%</span>
+                     <div class="control-row file-input-row">
+                        <input type="file" id="file-input-2" accept=".mp3" class="file-input">
+                    </div>
+                    <div class="control-row main-controls-row">
+                        <button id="play-pause-btn-2">Play</button>
+                        <button id="stop-btn-2">Stop</button>
+                        <button id="loop-btn-2">Loop: Off</button>
+                        <div class="vu-meter-container">
+                            <canvas id="vu-meter-L-2" width="10" height="50"></canvas>
+                            <canvas id="vu-meter-R-2" width="10" height="50"></canvas>
+                        </div>
+                    </div>
+                    <div class="control-row slider-row">
+                        <label>Volume:</label>
+                        <input type="range" id="volume-2" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
+                    </div>
+                     <div class="control-row slider-row">
+                        <label>Tempo:</label>
+                        <input type="range" id="tempo-slider-2" min="-8" max="8" step="0.1" value="0" class="tempo-slider">
+                        <span id="tempo-display-2" class="tempo-display">+0.0%</span>
+                    </div>
                 </div>
             </div>
         </div>
