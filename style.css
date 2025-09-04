@@ -89,12 +89,21 @@ progress {
 }
 
 /* Controls */
-.controls, .master-controls div {
+.controls {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column; /* Stack control rows vertically */
+    gap: 0.5rem;
+}
+
+.control-row {
+    display: flex;
+    width: 100%;
     gap: 0.5rem;
     align-items: center;
-    justify-content: center;
+}
+
+.main-controls-row {
+    justify-content: space-between;
 }
 
 button {
@@ -116,7 +125,7 @@ button:active {
 }
 
 .file-input {
-    flex-basis: 100%; /* Take full width */
+    flex-grow: 1;
 }
 
 input[type="range"] {
@@ -216,4 +225,16 @@ progress {
 .deck.drag-over {
     border-color: #3498db;
     border-style: dashed;
+}
+
+/* VU Meter Styles */
+.vu-meter-container {
+    display: flex;
+    gap: 4px;
+    padding: 5px;
+    border: 1px solid #222;
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    height: 50px;
+    box-sizing: border-box;
 }
