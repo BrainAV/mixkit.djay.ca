@@ -25,6 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
             this.sourceNode = null;
             this.gainNode = audioCtx.createGain();
             this.crossfaderGainNode = audioCtx.createGain();
+            
+            // VU Meter setup
+            this.splitterNode = audioCtx.createChannelSplitter(2);
+            this.analyserNodeL = audioCtx.createAnalyser();
+            this.analyserNodeR = audioCtx.createAnalyser();
+            this.analyserNodeL.fftSize = 2048; // Standard size for audio analysis
+            this.analyserNodeR.fftSize = 2048;
+            
             this.isPlaying = false;
             this.isLooping = false;
             this.startTime = 0;
@@ -32,8 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
             this.playbackRate = 1.0;
             this.isScrubbing = false;
 
-            // Connect nodes: individual deck gain -> crossfader gain -> master gain
+            // Connect nodes for audio output
             this.gainNode.connect(this.crossfaderGainNode);
+            // Connect nodes for VU meter analysis (in parallel)
+            this.gainNode.connect(this.splitterNode);
+            this.splitterNode.connect(this.analyserNodeL, 0);
+            this.splitterNode.connect(this.analyserNodeR, 1);
             this.crossfaderGainNode.connect(masterGain);
 
             // --- UI Elements ---
@@ -51,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.tempoSlider = document.getElementById(`tempo-slider-${deckId}`);
             this.tempoDisplay = document.getElementById(`tempo-display-${deckId}`);
             this.albumArtElement = document.getElementById(`album-art-${deckId}`);
+            this.vuMeterL = document.getElementById(`vu-meter-L-${deckId}`);
+            this.vuMeterR = document.getElementById(`vu-meter-R-${deckId}`);
 
             // Initially disable controls
             this.playPauseBtn.disabled = true;
@@ -192,7 +206,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateProgress() {
-            if (!this.isPlaying) return;
+            if (!this.isPlaying) {
+                // Clear the VU meter when paused/stopped
+                this.drawVUMeter(0, 0); 
+                return;
+            }
+
+            this.drawVUMeter();
 
             const elapsed = this.isLooping
                 ? (audioCtx.currentTime - this.startTime) % this.audioBuffer.duration
@@ -372,6 +392,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.progressBar.value = (this.pauseOffset / this.audioBuffer.duration) * 100;
                 this.currentTimeDisplay.textContent = this.formatTime(this.pauseOffset);
             }
+        }
+
+        drawVUMeter() {
+            const bufferLengthL = this.analyserNodeL.frequencyBinCount;
+            const dataArrayL = new Float32Array(bufferLengthL);
+            this.analyserNodeL.getFloatTimeDomainData(dataArrayL);
+
+            const bufferLengthR = this.analyserNodeR.frequencyBinCount;
+            const dataArrayR = new Float32Array(bufferLengthR);
+            this.analyserNodeR.getFloatTimeDomainData(dataArrayR);
+
+            // Calculate RMS for Left channel
+            let sumL = 0;
+            for(let i = 0; i < dataArrayL.length; i++) {
+                sumL += dataArrayL[i] * dataArrayL[i];
+            }
+            const rmsL = Math.sqrt(sumL / dataArrayL.length);
+
+            // Calculate RMS for Right channel
+            let sumR = 0;
+            for(let i = 0; i < dataArrayR.length; i++) {
+                sumR += dataArrayR[i] * dataArrayR[i];
+            }
+            const rmsR = Math.sqrt(sumR / dataArrayR.length);
+
+            this.drawMeter(this.vuMeterL, rmsL);
+            this.drawMeter(this.vuMeterR, rmsR);
+        }
+
+        drawMeter(canvas, rmsValue) {
+            const ctx = canvas.getContext('2d');
+            const WIDTH = canvas.width;
+            const HEIGHT = canvas.height;
+            const meterHeight = rmsValue * HEIGHT * 2.5; // Scale factor for visibility
+
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+            // Create a gradient for the meter bar
+            const gradient = ctx.createLinearGradient(0, HEIGHT, 0, 0);
+            gradient.addColorStop(0, '#00ff00');   // Green
+            gradient.addColorStop(0.75, '#ffff00'); // Yellow
+            gradient.addColorStop(1, '#ff0000');   // Red
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, HEIGHT - meterHeight, WIDTH, meterHeight);
         }
 
         // --- Drag and Drop Handlers ---
