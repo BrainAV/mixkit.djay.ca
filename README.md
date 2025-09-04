@@ -12,7 +12,7 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
 
 | Feature | What It Does |
 |---------|--------------|
-| **Open Local MP3s** | Browse and select any `.mp3` from your computer for instant playback via the Web Audio API. |
+| **Load Local Audio** | Browse and select common audio files (`.mp3`, `.wav`, `.flac`, etc.) from your computer for instant playback. |
 | **MP3 Metadata Display** | Shows track title, artist, and album art from the file's ID3 tags. |
 | **Deck Controls** | Play, pause, stop, loop (repeat), and crossfade between tracks. |
 | **Manual Tempo Control** | Adjust playback speed by +/- 8% for manual beatmatching. |
@@ -28,7 +28,7 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
    - Open `index.html` in any modern browser (Chrome, Edge, Firefox, Safari).
 
 2. **Add Tracks**  
-   - Click “Browse” on a deck to select an MP3 file from your hard drive.
+   - Click “Browse” on a deck to select an audio file from your hard drive.
 
 3. **Mix & Play**  
    - Use the deck controls for each track. The app keeps a single `AudioContext` and routes audio through gain nodes, enabling smooth volume changes and crossfades.
@@ -53,7 +53,7 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
 | Step | Action |
 |------|--------|
 | 1 | Double‑click `index.html`. |
-| 2 | Click “Browse” on each deck to select an MP3 file. |
+| 2 | Click “Browse” on each deck to select an audio file. |
 | 3 | Hit **Play**. |
 | 4 | Adjust volumes, tempo, and use the crossfader to mix! |
 
@@ -61,6 +61,7 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
 
 ### Future Enhancements (Roadmap)
 
+- 🎶 Playlist with autoplay.
 - 🎚️ Built‑in effects: reverb, delay, distortion.  
 - 🔊 Advanced beat‑matching & tempo sync (automatic BPM detection).  
 - 🎹 Key-lock (pitch correction during tempo changes).
