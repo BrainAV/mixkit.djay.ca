@@ -360,10 +360,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // If the track is currently playing, stop it and restart from the new position
             if (this.isPlaying) {
-                // We need to stop the old source and create a new one
                 if(this.sourceNode) {
                     this.sourceNode.stop();
                 }
+                this.isPlaying = false; // This allows the play() method to create a new source
                 this.play();
             }
             // If paused, the new pauseOffset will be picked up on the next play.
