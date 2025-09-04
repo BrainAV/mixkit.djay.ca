@@ -1021,24 +1021,32 @@
         let spectrumAnalyser;
 
         // Initialize application
-        window.addEventListener('load', () => {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            deckA = new Deck('A');
-            deckB = new Deck('B');
-            
-            masterGain = audioContext.createGain();
-            masterGain.gain.value = 0.75;
-            
-            deckA.gainNode.disconnect();
-            deckB.gainNode.disconnect();
-            
-            deckA.gainNode.connect(masterGain);
-            deckB.gainNode.connect(masterGain);
-            masterGain.connect(audioContext.destination);
-            
-            setupSpectrum();
-            startUpdateLoop();
+        window.addEventListener('load', async () => {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('Audio context created, state:', audioContext.state);
+                
+                deckA = new Deck('A');
+                deckB = new Deck('B');
+                
+                masterGain = audioContext.createGain();
+                masterGain.gain.value = 0.75;
+                
+                // Connect decks to master gain
+                deckA.gainNode.disconnect();
+                deckB.gainNode.disconnect();
+                
+                deckA.gainNode.connect(masterGain);
+                deckB.gainNode.connect(masterGain);
+                masterGain.connect(audioContext.destination);
+                
+                setupSpectrum();
+                startUpdateLoop();
+                
+                console.log('DJ Toolkit initialized successfully');
+            } catch (error) {
+                console.error('Error initializing DJ Toolkit:', error);
+            }
         });
 
         function setupSpectrum() {
