@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Toolkit Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .dj-container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 200px 1fr;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .deck {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .deck-header {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .track-info {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .album-art {
+            width: 50px;
+            height: 50px;
+            background: #333;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .track-details {
+            flex: 1;
+        }
+
+        .track-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .track-artist {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .file-button:hover {
+            transform: scale(1.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .control-btn.active {
+            background: #4ecdc4;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+        }
+
+        .progress-container {
+            background: rgba(0,0,0,0.3);
+            height: 40px;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+            border-radius: 20px;
+            transition: width 0.1s;
+            width: 0%;
+        }
+
+        .time-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+
+        .waveform {
+            height: 60px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waveform-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        .mixer {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .crossfader-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .crossfader {
+            width: 150px;
+            height: 6px;
+            transform: rotate(0deg);
+        }
+
+        .vu-meter {
+            width: 100%;
+            height: 100px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            gap: 5px;
+            align-items: flex-end;
+        }
+
+        .vu-bar {
+            flex: 1;
+            background: #333;
+            border-radius: 2px;
+            transition: height 0.1s;
+            min-height: 2px;
+        }
+
+        .vu-bar.active {
+            background: linear-gradient(to top, #4ecdc4, #45b7d1, #ff6b6b);
+        }
+
+        .spectrum {
+            height: 80px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 10px;
+            padding: 10px;
+        }
+
+        .spectrum-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .effects-panel {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .effect-control {
+            text-align: center;
+        }
+
+        .effect-knob {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: conic-gradient(#4ecdc4 0deg, rgba(255,255,255,0.2) 0deg);
+            margin: 0 auto 5px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .effect-knob::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 20px;
+            background: white;
+            border-radius: 1px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .playlist {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .playlist-item {
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 5px;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .playlist-item.playing {
+            background: rgba(78, 205, 196, 0.3);
+        }
+
+        .bpm-display {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .sync-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto 1fr;
+            }
+            
+            .mixer {
+                order: 2;
+            }
+            
+            .crossfader {
+                transform: none;
+                width: 200px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(78, 205, 196, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="dj-container">
+        <header class="header">
+            <h1>🎧 DJ Toolkit Pro</h1>
+            <button class="control-btn" onclick="openSettings()">⚙️ Settings</button>
+            <button class="control-btn" onclick="exportSession()">💾 Export</button>
+            <button class="control-btn" onclick="document.getElementById('importSession').click()">📁 Import</button>
+            <input type="file" id="importSession" accept=".json" style="display:none" onchange="importSession(event)">
+        </header>
+
+        <main class="main-content">
+            <!-- Deck A -->
+            <div class="deck" id="deckA">
+                <div class="deck-header">DECK A</div>
+                
+                <div class="track-info drop-zone" ondrop="dropHandler(event, 'A')" ondragover="dragOverHandler(event)" ondragleave="dragLeaveHandler(event)">
+                    <img class="album-art" id="albumArtA" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjMzMzIi8+CjxwYXRoIGQ9Ik0yNSAxNUwyNSAzNSIgc3Ryb2tlPSIjNjY2IiBzdHJva2Utd2lkdGg9IjIiLz4KPHN0cm9rZSBkPSJNMTUgMjVMMzUgMjUiIHN0cm9rZT0iIzY2NiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPgo=" alt="No Track">
+                    <div class="track-details">
+                        <div class="track-title" id="titleA">No track loaded</div>
+                        <div class="track-artist" id="artistA">Select a file</div>
+                    </div>
+                </div>
+
+                <div class="file-input-wrapper">
+                    <input type="file" class="file-input" id="fileA" accept="audio/*" onchange="loadTrack('A', this.files[0])">
+                    <button class="file-button" onclick="document.getElementById('fileA').click()">Browse Files</button>
+                </div>
+
+                <div class="bpm-display" id="bpmA">BPM: --</div>
+
+                <div class="controls">
+                    <button class="control-btn" id="playA" onclick="togglePlay('A')">▶️ Play</button>
+                    <button class="control-btn" onclick="stop('A')">⏹️ Stop</button>
+                    <button class="control-btn" id="loopA" onclick="toggleLoop('A')">🔄 Loop</button>
+                    <button class="control-btn" id="syncA" onclick="syncTempo('A')">🔗 Sync</button>
+                    <button class="control-btn" id="keylockA" onclick="toggleKeylock('A')">🔒 Key Lock</button>
+                </div>
+
+                <div class="progress-container" id="progressA" onclick="seek('A', event)">
+                    <div class="progress-bar" id="progressBarA"></div>
+                    <div class="time-display" id="timeA">0:00 / 0:00</div>
+                </div>
+
+                <div class="waveform">
+                    <canvas class="waveform-canvas" id="waveformA"></canvas>
+                </div>
+
+                <div class="slider-container">
+                    <label>Volume</label>
+                    <input type="range" class="slider" id="volumeA" min="0" max="100" value="75" oninput="setVolume('A', this.value)">
+                </div>
+
+                <div class="slider-container">
+                    <label>Tempo ±8%</label>
+                    <input type="range" class="slider" id="tempoA" min="-8" max="8" value="0" oninput="setTempo('A', this.value)">
+                    <span id="tempoValueA">0%</span>
+                </div>
+
+                <div class="effects-panel">
+                    <div class="effect-control">
+                        <div class="effect-knob" onclick="toggleEffect('A', 'reverb')"></div>
+                        <label>Reverb</label>
+                    </div>
+                    <div class="effect-control">
+                        <div class="effect-knob" onclick="toggleEffect('A', 'delay')"></div>
+                        <label>Delay</label>
+                    </div>
+                    <div class="effect-control">
+                        <div class="effect-knob" onclick="toggleEffect('A', 'filter')"></div>
+                        <label>Filter</label>
+                    </div>
+                </div>
+
+                <div class="vu-meter" id="vuMeterA">
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                </div>
+            </div>
+
+            <!-- Mixer -->
+            <div class="mixer">
+                <div class="slider-container">
+                    <label>Master Volume</label>
+                    <input type="range" class="slider" id="masterVolume" min="0" max="100" value="75" oninput="setMasterVolume(this.value)">
+                </div>
+
+                <div class="crossfader-container">
+                    <label>Crossfader</label>
+                    <input type="range" class="crossfader slider" id="crossfader" min="0" max="100" value="50" oninput="setCrossfader(this.value)">
+                </div>
+
+                <div class="spectrum">
+                    <canvas class="spectrum-canvas" id="spectrumCanvas"></canvas>
+                </div>
+
+                <button class="control-btn" onclick="toggleAutomix()">🤖 Automix</button>
+            </div>
+
+            <!-- Deck B -->
+            <div class="deck" id="deckB">
+                <div class="deck-header">DECK B</div>
+                
+                <div class="track-info drop-zone" ondrop="dropHandler(event, 'B')" ondragover="dragOverHandler(event)" ondragleave="dragLeaveHandler(event)">
+                    <img class="album-art" id="albumArtB" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjMzMzIi8+CjxwYXRoIGQ9Ik0yNSAxNUwyNSAzNSIgc3Ryb2tlPSIjNjY2IiBzdHJva2Utd2lkdGg9IjIiLz4KPHN0cm9rZSBkPSJNMTUgMjVMMzUgMjUiIHN0cm9rZT0iIzY2NiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPgo=" alt="No Track">
+                    <div class="track-details">
+                        <div class="track-title" id="titleB">No track loaded</div>
+                        <div class="track-artist" id="artistB">Select a file</div>
+                    </div>
+                </div>
+
+                <div class="file-input-wrapper">
+                    <input type="file" class="file-input" id="fileB" accept="audio/*" onchange="loadTrack('B', this.files[0])">
+                    <button class="file-button" onclick="document.getElementById('fileB').click()">Browse Files</button>
+                </div>
+
+                <div class="bpm-display" id="bpmB">BPM: --</div>
+
+                <div class="controls">
+                    <button class="control-btn" id="playB" onclick="togglePlay('B')">▶️ Play</button>
+                    <button class="control-btn" onclick="stop('B')">⏹️ Stop</button>
+                    <button class="control-btn" id="loopB" onclick="toggleLoop('B')">🔄 Loop</button>
+                    <button class="control-btn" id="syncB" onclick="syncTempo('B')">🔗 Sync</button>
+                    <button class="control-btn" id="keylockB" onclick="toggleKeylock('B')">🔒 Key Lock</button>
+                </div>
+
+                <div class="progress-container" id="progressB" onclick="seek('B', event)">
+                    <div class="progress-bar" id="progressBarB"></div>
+                    <div class="time-display" id="timeB">0:00 / 0:00</div>
+                </div>
+
+                <div class="waveform">
+                    <canvas class="waveform-canvas" id="waveformB"></canvas>
+                </div>
+
+                <div class="slider-container">
+                    <label>Volume</label>
+                    <input type="range" class="slider" id="volumeB" min="0" max="100" value="75" oninput="setVolume('B', this.value)">
+                </div>
+
+                <div class="slider-container">
+                    <label>Tempo ±8%</label>
+                    <input type="range" class="slider" id="tempoB" min="-8" max="8" value="0" oninput="setTempo('B', this.value)">
+                    <span id="tempoValueB">0%</span>
+                </div>
+
+                <div class="effects-panel">
+                    <div class="effect-control">
+                        <div class="effect-knob" onclick="toggleEffect('B', 'reverb')"></div>
+                        <label>Reverb</label>
+                    </div>
+                    <div class="effect-control">
+                        <div class="effect-knob" onclick="toggleEffect('B', 'delay')"></div>
+                        <label>Delay</label>
+                    </div>
+                    <div class="effect-control">
+                        <div class="effect-knob" onclick="toggleEffect('B', 'filter')"></div>
+                        <label>Filter</label>
+                    </div>
+                </div>
+
+                <div class="vu-meter" id="vuMeterB">
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                    <div class="vu-bar"></div>
+                </div>
+            </div>
+        </main>
+
+        <div class="playlist" id="playlist">
+            <h3>Playlist</h3>
+            <div id="playlistItems"></div>
+            <button class="control-btn" onclick="document.getElementById('addToPlaylist').click()" style="margin-top: 10px;">➕ Add Tracks</button>
+            <input type="file" id="addToPlaylist" multiple accept="audio/*" style="display:none" onchange="addToPlaylist(this.files)">
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2>Settings</h2>
+            <div style="margin: 20px 0;">
+                <label>Crossfader Curve:</label>
+                <select id="crossfaderCurve" onchange="setCrossfaderCurve(this.value)">
+                    <option value="linear">Linear</option>
+                    <option value="logarithmic">Logarithmic</option>
+                    <option value="exponential">Exponential</option>
+                </select>
+            </div>
+            <div style="margin: 20px 0;">
+                <label>Audio Latency (ms):</label>
+                <input type="number" id="audioLatency" value="20" min="0" max="100" onchange="setAudioLatency(this.value)">
+            </div>
+            <div style="margin: 20px 0;">
+                <label>Theme:</label>
+                <select id="theme" onchange="setTheme(this.value)">
+                    <option value="dark">Dark</option>
+                    <option value="neon">Neon</option>
+                    <option value="classic">Classic</option>
+                </select>
+            </div>
+            <button class="control-btn" onclick="closeSettings()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <script>
+        class Deck {
+            constructor(id) {
+                this.id = id;
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.audioBuffer = null;
+                this.audioSource = null;
+                this.gainNode = null;
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.isLooping = false;
+                this.startTime = 0;
+                this.pauseTime = 0;
+                this.duration = 0;
+                this.currentTime = 0;
+                this.bpm = 0;
+                this.originalBpm = 0;
+                this.tempo = 0;
+                this.keylock = false;
+                this.effects = {
+                    reverb: false,
+                    delay: false,
+                    filter: false
+                };
+                this.trackInfo = {
+                    title: '',
+                    artist: '',
+                    albumArt: null
+                };
+                
+                this.setupAudio();
+                this.setupAnalyser();
+            }
+
+            setupAudio() {
+                this.gainNode = this.audioContext.createGain();
+                this.gainNode.gain.value = 0.75;
+                
+                // Effects chain
+                this.reverbNode = this.audioContext.createConvolver();
+                this.delayNode = this.audioContext.createDelay();
+                this.filterNode = this.audioContext.createBiquadFilter();
+                
+                // Create reverb impulse response
+                this.createReverbImpulse();
+                
+                this.delayNode.delayTime.value = 0.3;
+                this.filterNode.frequency.value = 1000;
+                this.filterNode.Q.value = 1;
+                
+                this.gainNode.connect(this.audioContext.destination);
+            }
+
+            setupAnalyser() {
+                this.analyser = this.audioContext.createAnalyser();
+                this.analyser.fftSize = 256;
+                this.bufferLength = this.analyser.frequencyBinCount;
+                this.dataArray = new Uint8Array(this.bufferLength);
+                this.gainNode.connect(this.analyser);
+            }
+
+            createReverbImpulse() {
+                const length = this.audioContext.sampleRate * 2;
+                const impulse = this.audioContext.createBuffer(2, length, this.audioContext.sampleRate);
+                
+                for (let channel = 0; channel < 2; channel++) {
+                    const channelData = impulse.getChannelData(channel);
+                    for (let i = 0; i < length; i++) {
+                        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+                    }
+                }
+                
+                this.reverbNode.buffer = impulse;
+            }
+
+            async loadAudio(file) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+                    this.duration = this.audioBuffer.duration;
+                    
+                    // Extract metadata
+                    this.extractMetadata(file);
+                    
+                    // Detect BPM
+                    this.detectBPM();
+                    
+                    // Generate waveform
+                    this.generateWaveform();
+                    
+                    this.updateUI();
+                } catch (error) {
+                    console.error('Error loading audio:', error);
+                    alert('Error loading audio file. Please try a different file.');
+                }
+            }
+
+            extractMetadata(file) {
+                jsmediatags.read(file, {
+                    onSuccess: (tag) => {
+                        this.trackInfo.title = tag.tags.title || file.name;
+                        this.trackInfo.artist = tag.tags.artist || 'Unknown Artist';
+                        
+                        if (tag.tags.picture) {
+                            const { data, format } = tag.tags.picture;
+                            const base64String = data.reduce((acc, byte) => acc + String.fromCharCode(byte), '');
+                            this.trackInfo.albumArt = `data:${format};base64,${btoa(base64String)}`;
+                        }
+                        
+                        this.updateTrackInfo();
+                    },
+                    onError: (error) => {
+                        console.log('Metadata extraction failed:', error);
+                        this.trackInfo.title = file.name;
+                        this.trackInfo.artist = 'Unknown Artist';
+                        this.updateTrackInfo();
+                    }
+                });
+            }
+
+            detectBPM() {
+                if (!this.audioBuffer) return;
+
+                const channelData = this.audioBuffer.getChannelData(0);
+                const sampleRate = this.audioBuffer.sampleRate;
+                
+                // Simple BPM detection using peak analysis
+                const windowSize = Math.floor(sampleRate * 0.1); // 100ms window
+                const peaks = [];
+                
+                for (let i = windowSize; i < channelData.length - windowSize; i += windowSize) {
+                    let sum = 0;
+                    for (let j = i - windowSize; j < i + windowSize; j++) {
+                        sum += Math.abs(channelData[j]);
+                    }
+                    peaks.push(sum / (windowSize * 2));
+                }
+                
+                // Find tempo based on peak intervals
+                const intervals = [];
+                const threshold = Math.max(...peaks) * 0.6;
+                
+                let lastPeak = -1;
+                for (let i = 0; i < peaks.length; i++) {
+                    if (peaks[i] > threshold && i - lastPeak > 5) {
+                        if (lastPeak !== -1) {
+                            intervals.push((i - lastPeak) * 0.1);
+                        }
+                        lastPeak = i;
+                    }
+                }
+                
+                if (intervals.length > 0) {
+                    const avgInterval = intervals.reduce((a, b) => a + b) / intervals.length;
+                    this.bpm = Math.round(60 / avgInterval);
+                    this.originalBpm = this.bpm;
+                } else {
+                    this.bpm = 120; // Default BPM
+                    this.originalBpm = 120;
+                }
+                
+                document.getElementById(`bpm${this.id}`).textContent = `BPM: ${this.bpm}`;
+            }
+
+            generateWaveform() {
+                const canvas = document.getElementById(`waveform${this.id}`);
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width = canvas.offsetWidth;
+                const height = canvas.height = canvas.offsetHeight;
+                
+                if (!this.audioBuffer) return;
+                
+                const channelData = this.audioBuffer.getChannelData(0);
+                const samples = width;
+                const blockSize = Math.floor(channelData.length / samples);
+                
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = '#4ecdc4';
+                
+                for (let i = 0; i < samples; i++) {
+                    let sum = 0;
+                    for (let j = 0; j < blockSize; j++) {
+                        sum += Math.abs(channelData[i * blockSize + j]);
+                    }
+                    const amplitude = sum / blockSize;
+                    const barHeight = amplitude * height;
+                    
+                    ctx.fillRect(i * (width / samples), (height - barHeight) / 2, width / samples - 1, barHeight);
+                }
+            }
+
+            play() {
+                if (!this.audioBuffer) return;
+                
+                if (this.audioSource) {
+                    this.audioSource.disconnect();
+                }
+                
+                this.audioSource = this.audioContext.createBufferSource();
+                this.audioSource.buffer = this.audioBuffer;
+                
+                // Apply tempo change
+                const playbackRate = 1 + (this.tempo / 100);
+                this.audioSource.playbackRate.value = playbackRate;
+                
+                // Connect effects chain
+                let currentNode = this.audioSource;
+                
+                if (this.effects.reverb) {
+                    currentNode.connect(this.reverbNode);
+                    currentNode = this.reverbNode;
+                }
+                
+                if (this.effects.delay) {
+                    currentNode.connect(this.delayNode);
+                    currentNode = this.delayNode;
+                }
+                
+                if (this.effects.filter) {
+                    currentNode.connect(this.filterNode);
+                    currentNode = this.filterNode;
+                }
+                
+                currentNode.connect(this.gainNode);
+                
+                this.audioSource.loop = this.isLooping;
+                
+                const startTime = this.isPaused ? this.pauseTime : 0;
+                this.audioSource.start(0, startTime);
+                this.startTime = this.audioContext.currentTime - startTime;
+                
+                this.isPlaying = true;
+                this.isPaused = false;
+                
+                document.getElementById(`play${this.id}`).textContent = '⏸️ Pause';
+            }
+
+            pause() {
+                if (this.audioSource && this.isPlaying) {
+                    this.audioSource.stop();
+                    this.pauseTime = this.audioContext.currentTime - this.startTime;
+                    this.isPlaying = false;
+                    this.isPaused = true;
+                    
+                    document.getElementById(`play${this.id}`).textContent = '▶️ Play';
+                }
+            }
+
+            stop() {
+                if (this.audioSource) {
+                    this.audioSource.stop();
+                    this.audioSource = null;
+                }
+                
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.pauseTime = 0;
+                this.currentTime = 0;
+                
+                document.getElementById(`play${this.id}`).textContent = '▶️ Play';
+                this.updateProgress();
+            }
+
+            toggleLoop() {
+                this.isLooping = !this.isLooping;
+                const btn = document.getElementById(`loop${this.id}`);
+                btn.classList.toggle('active', this.isLooping);
+                
+                if (this.audioSource) {
+                    this.audioSource.loop = this.isLooping;
+                }
+            }
+
+            toggleKeylock() {
+                this.keylock = !this.keylock;
+                const btn = document.getElementById(`keylock${this.id}`);
+                btn.classList.toggle('active', this.keylock);
+            }
+
+            setVolume(value) {
+                this.gainNode.gain.value = value / 100;
+            }
+
+            setTempo(value) {
+                this.tempo = parseFloat(value);
+                document.getElementById(`tempoValue${this.id}`).textContent = `${value}%`;
+                
+                if (this.audioSource && this.isPlaying) {
+                    const playbackRate = 1 + (this.tempo / 100);
+                    this.audioSource.playbackRate.value = playbackRate;
+                    
+                    if (!this.keylock) {
+                        this.bpm = Math.round(this.originalBpm * playbackRate);
+                        document.getElementById(`bpm${this.id}`).textContent = `BPM: ${this.bpm}`;
+                    }
+                }
+            }
+
+            seek(percentage) {
+                if (!this.audioBuffer) return;
+                
+                const seekTime = this.duration * percentage;
+                this.pauseTime = seekTime;
+                
+                if (this.isPlaying) {
+                    this.pause();
+                    this.play();
+                }
+                
+                this.updateProgress();
+            }
+
+            getCurrentTime() {
+                if (this.isPlaying) {
+                    return this.audioContext.currentTime - this.startTime;
+                }
+                return this.pauseTime;
+            }
+
+            updateProgress() {
+                this.currentTime = this.getCurrentTime();
+                const percentage = (this.currentTime / this.duration) * 100;
+                
+                document.getElementById(`progressBar${this.id}`).style.width = `${Math.min(percentage, 100)}%`;
+                
+                const currentMin = Math.floor(this.currentTime / 60);
+                const currentSec = Math.floor(this.currentTime % 60).toString().padStart(2, '0');
+                const totalMin = Math.floor(this.duration / 60);
+                const totalSec = Math.floor(this.duration % 60).toString().padStart(2, '0');
+                
+                document.getElementById(`time${this.id}`).textContent = `${currentMin}:${currentSec} / ${totalMin}:${totalSec}`;
+            }
+
+            updateTrackInfo() {
+                document.getElementById(`title${this.id}`).textContent = this.trackInfo.title;
+                document.getElementById(`artist${this.id}`).textContent = this.trackInfo.artist;
+                
+                if (this.trackInfo.albumArt) {
+                    document.getElementById(`albumArt${this.id}`).src = this.trackInfo.albumArt;
+                }
+            }
+
+            updateUI() {
+                this.updateTrackInfo();
+                this.updateProgress();
+            }
+
+            updateVUMeter() {
+                if (!this.analyser) return;
+                
+                this.analyser.getByteFrequencyData(this.dataArray);
+                const vuMeter = document.getElementById(`vuMeter${this.id}`);
+                const bars = vuMeter.querySelectorAll('.vu-bar');
+                
+                for (let i = 0; i < bars.length; i++) {
+                    const value = this.dataArray[i * 4] || 0;
+                    const height = (value / 255) * 100;
+                    bars[i].style.height = `${height}%`;
+                    bars[i].classList.toggle('active', value > 50);
+                }
+            }
+
+            toggleEffect(effect) {
+                this.effects[effect] = !this.effects[effect];
+                
+                // Visual feedback would go here - for now just log
+                console.log(`${effect} ${this.effects[effect] ? 'enabled' : 'disabled'} on deck ${this.id}`);
+            }
+
+            syncTo(otherDeck) {
+                if (otherDeck.bpm && otherDeck.bpm > 0) {
+                    const targetTempo = ((otherDeck.bpm / this.originalBpm) - 1) * 100;
+                    document.getElementById(`tempo${this.id}`).value = targetTempo;
+                    this.setTempo(targetTempo);
+                }
+            }
+        }
+
+        // Global variables
+        let deckA, deckB;
+        let masterGain;
+        let audioContext;
+        let crossfaderValue = 50;
+        let playlist = [];
+        let automixEnabled = false;
+        let spectrumAnalyser;
+
+        // Initialize application
+        window.addEventListener('load', () => {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            deckA = new Deck('A');
+            deckB = new Deck('B');
+            
+            masterGain = audioContext.createGain();
+            masterGain.gain.value = 0.75;
+            
+            deckA.gainNode.disconnect();
+            deckB.gainNode.disconnect();
+            
+            deckA.gainNode.connect(masterGain);
+            deckB.gainNode.connect(masterGain);
+            masterGain.connect(audioContext.destination);
+            
+            setupSpectrum();
+            startUpdateLoop();
+        });
+
+        function setupSpectrum() {
+            spectrumAnalyser = audioContext.createAnalyser();
+            spectrumAnalyser.fftSize = 256;
+            masterGain.connect(spectrumAnalyser);
+            
+            const canvas = document.getElementById('spectrumCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function drawSpectrum() {
+                const width = canvas.width = canvas.offsetWidth;
+                const height = canvas.height = canvas.offsetHeight;
+                
+                const bufferLength = spectrumAnalyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                spectrumAnalyser.getByteFrequencyData(dataArray);
+                
+                ctx.clearRect(0, 0, width, height);
+                
+                const barWidth = width / bufferLength;
+                let x = 0;
+                
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * height;
+                    
+                    const r = Math.floor(78 + (dataArray[i] / 255) * 177);
+                    const g = Math.floor(205 - (dataArray[i] / 255) * 50);
+                    const b = Math.floor(196 - (dataArray[i] / 255) * 50);
+                    
+                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+                    
+                    x += barWidth;
+                }
+                
+                requestAnimationFrame(drawSpectrum);
+            }
+            
+            drawSpectrum();
+        }
+
+        function startUpdateLoop() {
+            function update() {
+                deckA.updateProgress();
+                deckB.updateProgress();
+                deckA.updateVUMeter();
+                deckB.updateVUMeter();
+                
+                // Check for automix
+                if (automixEnabled) {
+                    checkAutomix();
+                }
+                
+                requestAnimationFrame(update);
+            }
+            update();
+        }
+
+        // Event handlers
+        function loadTrack(deckId, file) {
+            if (file) {
+                const deck = deckId === 'A' ? deckA : deckB;
+                deck.loadAudio(file);
+            }
+        }
+
+        function togglePlay(deckId) {
+            const deck = deckId === 'A' ? deckA : deckB;
+            
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            if (deck.isPlaying) {
+                deck.pause();
+            } else {
+                deck.play();
+            }
+        }
+
+        function stop(deckId) {
+            const deck = deckId === 'A' ? deckA : deckB;
+            deck.stop();
+        }
+
+        function toggleLoop(deckId) {
+            const deck = deckId === 'A' ? deckA : deckB;
+            deck.toggleLoop();
+        }
+
+        function toggleKeylock(deckId) {
+            const deck = deckId === 'A' ? deckA : deckB;
+            deck.toggleKeylock();
+        }
+
+        function setVolume(deckId, value) {
+            const deck = deckId === 'A' ? deckA : deckB;
+            deck.setVolume(value);
+        }
+
+        function setTempo(deckId, value) {
+            const deck = deckId === 'A' ? deckA : deckB;
+            deck.setTempo(value);
+        }
+
+        function setMasterVolume(value) {
+            masterGain.gain.value = value / 100;
+        }
+
+        function setCrossfader(value) {
+            crossfaderValue = parseFloat(value);
+            
+            // Apply crossfader curve
+            const leftGain = Math.cos((crossfaderValue / 100) * Math.PI / 2);
+            const rightGain = Math.sin((crossfaderValue / 100) * Math.PI / 2);
+            
+            deckA.gainNode.gain.value = leftGain * (document.getElementById('volumeA').value / 100);
+            deckB.gainNode.gain.value = rightGain * (document.getElementById('volumeB').value / 100);
+        }
+
+        function seek(deckId, event) {
+            const rect = event.target.getBoundingClientRect();
+            const percentage = (event.clientX - rect.left) / rect.width;
+            const deck = deckId === 'A' ? deckA : deckB;
+            deck.seek(percentage);
+        }
+
+        function syncTempo(deckId) {
+            if (deckId === 'A') {
+                deckA.syncTo(deckB);
+            } else {
+                deckB.syncTo(deckA);
+            }
+        }
+
+        function toggleEffect(deckId, effect) {
+            const deck = deckId === 'A' ? deckA : deckB;
+            deck.toggleEffect(effect);
+        }
+
+        function toggleAutomix() {
+            automixEnabled = !automixEnabled;
+            const btn = event.target;
+            btn.classList.toggle('active', automixEnabled);
+            btn.textContent = automixEnabled ? '🤖 Automix ON' : '🤖 Automix';
+        }
+
+        function checkAutomix() {
+            // Simple automix logic - crossfade when track is near end
+            if (deckA.isPlaying && deckA.currentTime > deckA.duration - 30) {
+                if (deckB.audioBuffer && !deckB.isPlaying) {
+                    deckB.play();
+                    // Gradually crossfade
+                    const fadeTime = 10; // 10 seconds
+                    const timeLeft = deckA.duration - deckA.currentTime;
+                    const crossfaderPosition = Math.max(0, Math.min(100, 50 + ((30 - timeLeft) / fadeTime) * 50));
+                    document.getElementById('crossfader').value = crossfaderPosition;
+                    setCrossfader(crossfaderPosition);
+                }
+            }
+        }
+
+        // Drag and drop handlers
+        function dragOverHandler(event) {
+            event.preventDefault();
+            event.target.closest('.drop-zone').classList.add('drag-over');
+        }
+
+        function dragLeaveHandler(event) {
+            event.target.closest('.drop-zone').classList.remove('drag-over');
+        }
+
+        function dropHandler(event, deckId) {
+            event.preventDefault();
+            event.target.closest('.drop-zone').classList.remove('drag-over');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                loadTrack(deckId, files[0]);
+            }
+        }
+
+        // Playlist functions
+        function addToPlaylist(files) {
+            for (const file of files) {
+                playlist.push({
+                    file: file,
+                    name: file.name,
+                    loaded: false
+                });
+            }
+            updatePlaylistUI();
+        }
+
+        function updatePlaylistUI() {
+            const container = document.getElementById('playlistItems');
+            container.innerHTML = '';
+            
+            playlist.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'playlist-item';
+                div.textContent = item.name;
+                div.onclick = () => loadPlaylistItem(index);
+                container.appendChild(div);
+            });
+        }
+
+        function loadPlaylistItem(index) {
+            const item = playlist[index];
+            if (item && item.file) {
+                // Load to available deck
+                if (!deckA.audioBuffer || !deckA.isPlaying) {
+                    loadTrack('A', item.file);
+                } else if (!deckB.audioBuffer || !deckB.isPlaying) {
+                    loadTrack('B', item.file);
+                }
+            }
+        }
+
+        // Settings functions
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function setCrossfaderCurve(curve) {
+            // Implementation would adjust the crossfader curve algorithm
+            console.log('Crossfader curve set to:', curve);
+        }
+
+        function setAudioLatency(latency) {
+            // Implementation would adjust audio buffer sizes
+            console.log('Audio latency set to:', latency, 'ms');
+        }
+
+        function setTheme(theme) {
+            // Implementation would switch CSS themes
+            console.log('Theme set to:', theme);
+        }
+
+        // Session management
+        function exportSession() {
+            const session = {
+                deckA: {
+                    trackInfo: deckA.trackInfo,
+                    volume: document.getElementById('volumeA').value,
+                    tempo: document.getElementById('tempoA').value,
+                    isLooping: deckA.isLooping,
+                    effects: deckA.effects
+                },
+                deckB: {
+                    trackInfo: deckB.trackInfo,
+                    volume: document.getElementById('volumeB').value,
+                    tempo: document.getElementById('tempoB').value,
+                    isLooping: deckB.isLooping,
+                    effects: deckB.effects
+                },
+                masterVolume: document.getElementById('masterVolume').value,
+                crossfader: document.getElementById('crossfader').value,
+                playlist: playlist.map(item => ({ name: item.name }))
+            };
+            
+            const blob = new Blob([JSON.stringify(session, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dj_session.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importSession(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const session = JSON.parse(e.target.result);
+                        
+                        // Restore settings
+                        document.getElementById('volumeA').value = session.deckA.volume;
+                        document.getElementById('volumeB').value = session.deckB.volume;
+                        document.getElementById('tempoA').value = session.deckA.tempo;
+                        document.getElementById('tempoB').value = session.deckB.tempo;
+                        document.getElementById('masterVolume').value = session.masterVolume;
+                        document.getElementById('crossfader').value = session.crossfader;
+                        
+                        setVolume('A', session.deckA.volume);
+                        setVolume('B', session.deckB.volume);
+                        setTempo('A', session.deckA.tempo);
+                        setTempo('B', session.deckB.tempo);
+                        setMasterVolume(session.masterVolume);
+                        setCrossfader(session.crossfader);
+                        
+                        alert('Session loaded successfully!');
+                    } catch (error) {
+                        alert('Error loading session file.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Click outside modal to close
+        window.onclick = function(event) {
+            const modal = document.getElementById('settingsModal');
+            if (event.target === modal) {
+                closeSettings();
+            }
+        };
+    </script>
+</body>
+</html>
