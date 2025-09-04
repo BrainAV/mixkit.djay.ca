@@ -43,7 +43,7 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
 - **Pure HTML/CSS/JS** – No frameworks, no build step.
 - **Web Audio API** – Full control over audio decoding, mixing, and effects.
 - **File API** – Reads local files securely without any server‑side code.
-- **jsmediatags Library** – Uses a third-party library loaded from a CDN to read ID3 metadata from MP3 files.
+- **jsmediatags Library** – Uses a bundled third-party library to read ID3 metadata from MP3 files.
 - **Responsive UI** – Works on desktops and tablets.
 
 ---
