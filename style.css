@@ -1,0 +1,240 @@
+/* Basic Setup */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 1200px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+h1, h2 {
+    text-align: center;
+    color: #ffffff;
+    border-bottom: 2px solid #444;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+/* Layout */
+.decks-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.deck {
+    flex: 1;
+    background-color: #333;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.master-controls {
+    background-color: #333;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+/* Deck Elements */
+.track-info {
+    background-color: #222;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 1.2em;
+}
+
+.waveform-container {
+    background-color: #000;
+    height: 100px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.time-display {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+progress {
+    width: 100%;
+    height: 10px;
+    margin-bottom: 1rem;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    flex-direction: column; /* Stack control rows vertically */
+    gap: 0.5rem;
+}
+
+.control-row {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.main-controls-row {
+    justify-content: space-between;
+}
+
+button {
+    background-color: #555;
+    color: white;
+    border: 1px solid #777;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #666;
+}
+
+button:active {
+    background-color: #777;
+}
+
+.file-input {
+    flex-grow: 1;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+}
+
+/* Master Controls Specifics */
+.crossfader-container, .master-volume-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    width: 50%;
+    margin: 0 auto;
+}
+
+.utility-controls {
+    margin-top: 1rem;
+    border-top: 1px solid #444;
+    padding-top: 1rem;
+}
+
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    .decks-container {
+        flex-direction: column;
+    }
+    .crossfader-container, .master-volume-container {
+        width: 80%;
+    }
+}
+
+/* Tempo Control Specifics */
+.tempo-slider {
+    flex-grow: 1;
+}
+
+.tempo-display {
+    min-width: 4.5em; /* Reserve space to prevent layout shifts */
+    text-align: right;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+}
+
+/* Album Art Display */
+.album-art {
+    display: none; /* Hidden by default, shown via JS */
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    margin: 0 auto 1rem;
+    background-color: #222;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+/* Spectrum Analyzer */
+.spectrum-canvas {
+    width: 100%;
+    height: 80px;
+    background-color: #000;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    border: 1px solid #444;
+}
+
+/* Seek/Scrub Styles */
+.progress-bar-container {
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+/* Override default progress margin since the container has it now */
+progress {
+    width: 100%;
+    height: 10px;
+    margin-bottom: 0;
+    pointer-events: none; /* Clicks should be handled by the container */
+}
+
+.seek-tooltip {
+    position: absolute;
+    display: none; /* Hidden by default */
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    pointer-events: none; /* Tooltip should not capture mouse events */
+    z-index: 100;
+    transform: translateX(-50%); /* Center the tooltip horizontally on the cursor */
+    white-space: nowrap;
+}
+
+/* Drag and Drop Styling */
+.deck.drag-over {
+    border-color: #3498db;
+    border-style: dashed;
+}
+
+/* VU Meter Styles */
+.vu-meter-container {
+    display: flex;
+    gap: 4px;
+    padding: 5px;
+    border: 1px solid #222;
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    height: 50px;
+    box-sizing: border-box;
+}
