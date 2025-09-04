@@ -61,6 +61,7 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
 
 ### Future Enhancements (Roadmap)
 
+- ⚙️ Settings button with overlay window for options.
 - 🎶 Playlist with autoplay.
 - 🎚️ Built‑in effects: reverb, delay, distortion.  
 - 🔊 Advanced beat‑matching & tempo sync (automatic BPM detection).  
