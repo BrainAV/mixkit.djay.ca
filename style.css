@@ -4,19 +4,23 @@ body {
     background-color: #1a1a1a;
     color: #f0f0f0;
     margin: 0;
-    padding: 2rem;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    min-height: 100vh; /* Full viewport height */
 }
 
 #app-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px; /* Increased max-width for better spacing */
     background-color: #2a2a2a;
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    min-height: 100vh; /* Ensure container takes full height */
+    display: flex;
+    flex-direction: column;
 }
 
 h1, h2 {
@@ -31,27 +35,24 @@ h1, h2 {
 .decks-container {
     display: flex;
     justify-content: space-between;
-    gap: 1rem; /* Reduced gap for a tighter layout */
+    gap: 2rem;
+    flex: 1; /* Allow decks to take available space */
+    margin-bottom: 2rem;
 }
 
 .deck {
-    flex: 5; /* Decks take up more space */
+    flex: 1;
     background-color: #333;
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #444;
-    display: flex;
-    flex-direction: column;
 }
 
 .master-controls {
-    flex: 2; /* Mixer takes up less space */
     background-color: #333;
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #444;
-    display: flex;
-    flex-direction: column;
 }
 
 /* Deck Elements */
@@ -89,13 +90,14 @@ canvas {
 progress {
     width: 100%;
     height: 10px;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
+    pointer-events: none;
 }
 
 /* Controls */
 .controls {
     display: flex;
-    flex-direction: column; /* Stack control rows vertically */
+    flex-direction: column;
     gap: 0.5rem;
 }
 
@@ -136,29 +138,66 @@ input[type="range"] {
     flex-grow: 1;
 }
 
-/* Master Controls Specifics */
-.crossfader-container, .master-volume-container {
+/* Mixer Section */
+.mixer-container {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.5rem;
-    width: 50%;
-    margin: 0 auto;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1rem;
 }
 
+.mixer-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mixer-control input[type="range"][orient="vertical"] {
+    writing-mode: bt-lr; /* For vertical orientation */
+    -webkit-appearance: slider-vertical; /* For WebKit browsers */
+    width: 20px; /* Width of the slider */
+    height: 100px; /* Height of the slider */
+}
+
+.mixer-control label {
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.crossfader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    margin: 0 auto;
+    gap: 0.5rem;
+}
+
+.crossfader-container input[type="range"] {
+    width: 100%;
+}
+
+/* Utility Controls */
 .utility-controls {
     margin-top: 1rem;
     border-top: 1px solid #444;
     padding-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
 }
 
-
 /* Responsive Design */
-@media (max-width: 1200px) { /* Adjusted breakpoint for a 3-column layout */
+@media (max-width: 900px) {
     .decks-container {
         flex-direction: column;
     }
-    .crossfader-container, .master-volume-container {
+    .mixer-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .crossfader-container {
         width: 80%;
     }
 }
@@ -169,7 +208,7 @@ input[type="range"] {
 }
 
 .tempo-display {
-    min-width: 4.5em; /* Reserve space to prevent layout shifts */
+    min-width: 4.5em;
     text-align: right;
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.9em;
@@ -177,7 +216,7 @@ input[type="range"] {
 
 /* Album Art Display */
 .album-art {
-    display: none; /* Hidden by default, shown via JS */
+    display: none;
     width: 120px;
     height: 120px;
     object-fit: cover;
@@ -203,25 +242,17 @@ input[type="range"] {
     padding: 5px 0;
 }
 
-/* Override default progress margin since the container has it now */
-progress {
-    width: 100%;
-    height: 10px;
-    margin-bottom: 0; 
-    pointer-events: none; /* Clicks should be handled by the container */
-}
-
 .seek-tooltip {
     position: absolute;
-    display: none; /* Hidden by default */
+    display: none;
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
     font-size: 0.9em;
-    pointer-events: none; /* Tooltip should not capture mouse events */
+    pointer-events: none;
     z-index: 100;
-    transform: translateX(-50%); /* Center the tooltip horizontally on the cursor */
+    transform: translateX(-50%);
     white-space: nowrap;
 }
 
