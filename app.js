@@ -1,22 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Audio Context Setup ---
-    // Create a single AudioContext for the entire application
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Create a master gain node to control the overall volume
     const masterGain = audioCtx.createGain();
-    
-    // Create an analyser node for the spectrum visualizer
     const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256; // Smaller size for performance
-    
-    // Connect the audio graph: Master Gain -> Analyser -> Destination (speakers)
+    analyser.fftSize = 256;
     masterGain.connect(analyser);
     analyser.connect(audioCtx.destination);
 
     const seekTooltip = document.getElementById('seek-tooltip');
 
     // --- Deck Class ---
-    // A class to manage the state and functionality of a single deck
     class Deck {
         constructor(deckId) {
             this.deckId = deckId;
@@ -25,14 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
             this.sourceNode = null;
             this.gainNode = audioCtx.createGain();
             this.crossfaderGainNode = audioCtx.createGain();
-            
-            // VU Meter setup
             this.splitterNode = audioCtx.createChannelSplitter(2);
             this.analyserNodeL = audioCtx.createAnalyser();
             this.analyserNodeR = audioCtx.createAnalyser();
-            this.analyserNodeL.fftSize = 2048; // Standard size for audio analysis
+            this.analyserNodeL.fftSize = 2048;
             this.analyserNodeR.fftSize = 2048;
-            
             this.isPlaying = false;
             this.isLooping = false;
             this.startTime = 0;
@@ -40,9 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.playbackRate = 1.0;
             this.isScrubbing = false;
 
-            // Connect nodes for audio output
             this.gainNode.connect(this.crossfaderGainNode);
-            // Connect nodes for VU meter analysis (in parallel)
             this.gainNode.connect(this.splitterNode);
             this.splitterNode.connect(this.analyserNodeL, 0);
             this.splitterNode.connect(this.analyserNodeR, 1);
@@ -53,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.playPauseBtn = document.getElementById(`play-pause-btn-${deckId}`);
             this.stopBtn = document.getElementById(`stop-btn-${deckId}`);
             this.loopBtn = document.getElementById(`loop-btn-${deckId}`);
-            this.volumeSlider = document.getElementById(`volume-${deckId}`);
+            this.volumeSlider = document.getElementById(`volume-${deckId}`); // Updated to mixer slider
             this.trackInfo = document.getElementById(`track-info-${deckId}`);
             this.progressBar = document.getElementById(`progress-${deckId}`);
             this.progressContainer = document.getElementById(`progress-container-${deckId}`);
@@ -82,20 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.gainNode.gain.value = e.target.value;
             });
             this.tempoSlider.addEventListener('input', this.updateTempo.bind(this));
-
-            // Scrubbing listeners
             this.progressContainer.addEventListener('mousedown', this.handleScrubbingStart.bind(this));
             this.progressContainer.addEventListener('mousemove', this.handleScrubbingMove.bind(this));
             this.progressContainer.addEventListener('mouseup', this.handleScrubbingEnd.bind(this));
             this.progressContainer.addEventListener('mouseleave', this.handleScrubbingEnd.bind(this));
-
-            // Drag and Drop Listeners
             this.deckElement.addEventListener('dragover', this.handleDragOver.bind(this));
             this.deckElement.addEventListener('dragleave', this.handleDragLeave.bind(this));
             this.deckElement.addEventListener('drop', this.handleDrop.bind(this));
         }
 
-        // --- Load Audio File ---
         loadFile(event) {
             const file = event.target.files[0];
             if (file) {
@@ -108,29 +91,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Please drop a valid audio file.');
                 return;
             }
-            // Reset previous track state
             this.stop();
             this.trackInfo.textContent = `Loading: ${file.name}...`;
             this.loadMetadata(file);
-            
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 this.audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-                
-                // If metadata didn't provide a title, stick with the filename
                 if (this.trackInfo.textContent === `Loading: ${file.name}...`) {
                     this.trackInfo.textContent = file.name;
                 }
                 this.totalTimeDisplay.textContent = this.formatTime(this.audioBuffer.duration);
                 this.drawWaveform();
-                
-                // Enable controls
                 this.playPauseBtn.disabled = false;
                 this.stopBtn.disabled = false;
                 this.loopBtn.disabled = false;
                 this.volumeSlider.disabled = false;
                 this.tempoSlider.disabled = false;
-
             } catch (err) {
                 this.trackInfo.textContent = 'Error decoding audio file.';
                 console.error(`Error for deck ${this.deckId}:`, err);
@@ -138,11 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         togglePlayPause() {
-            // If the audio context is suspended (due to browser autoplay policies), resume it
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-
             if (this.isPlaying) {
                 this.pause();
             } else {
@@ -152,32 +126,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         play() {
             if (!this.audioBuffer || this.isPlaying) return;
-
             this.sourceNode = audioCtx.createBufferSource();
             this.sourceNode.buffer = this.audioBuffer;
             this.sourceNode.loop = this.isLooping;
-            this.sourceNode.playbackRate.value = this.playbackRate; // Apply tempo
+            this.sourceNode.playbackRate.value = this.playbackRate;
             this.sourceNode.connect(this.gainNode);
-
-            // Calculate the correct offset to resume from
             const offset = this.pauseOffset % this.audioBuffer.duration;
             this.sourceNode.start(0, offset);
-
             this.startTime = audioCtx.currentTime - offset;
             this.isPlaying = true;
             this.playPauseBtn.textContent = 'Pause';
-            
-            // Start the animation frame loop for progress updates
             requestAnimationFrame(this.updateProgress.bind(this));
         }
 
         pause() {
             if (!this.sourceNode || !this.isPlaying) return;
-
-            this.sourceNode.stop(); // This destroys the source node
-            this.sourceNode = null; // Discard the old node
-            
-            // Save our position
+            this.sourceNode.stop();
+            this.sourceNode = null;
             this.pauseOffset = audioCtx.currentTime - this.startTime;
             this.isPlaying = false;
             this.playPauseBtn.textContent = 'Play';
@@ -207,17 +172,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateProgress() {
             if (!this.isPlaying) {
-                // Clear the VU meter when paused/stopped
-                this.drawVUMeter(0, 0); 
+                this.drawVUMeter(0, 0);
                 return;
             }
-
             this.drawVUMeter();
-
             const elapsed = this.isLooping
                 ? (audioCtx.currentTime - this.startTime) % this.audioBuffer.duration
                 : audioCtx.currentTime - this.startTime;
-
             if (elapsed >= this.audioBuffer.duration && !this.isLooping) {
                 this.stop();
             } else {
@@ -235,47 +196,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         drawWaveform() {
             if (!this.audioBuffer || !this.waveformCanvas) return;
-
-            // Reset tempo slider and display when a new track is loaded
             this.tempoSlider.value = 0;
             this.tempoDisplay.textContent = '+0.0%';
             this.playbackRate = 1.0;
-
             const canvas = this.waveformCanvas;
             const ctx = canvas.getContext('2d');
-            // Get the raw audio data from the first channel
             const channelData = this.audioBuffer.getChannelData(0);
-            
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
-
-            // Clear the canvas before drawing
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-            // Determine how many samples we need to average for each pixel on the canvas
             const samplesPerPixel = Math.floor(channelData.length / canvasWidth);
             const filteredData = [];
-
-            // Downsample the audio data to fit the canvas width
             for (let i = 0; i < canvasWidth; i++) {
                 const blockStart = samplesPerPixel * i;
                 let sum = 0;
                 for (let j = 0; j < samplesPerPixel; j++) {
-                    // Sum the absolute values to get the amplitude
                     sum += Math.abs(channelData[blockStart + j] || 0);
                 }
                 filteredData.push(sum / samplesPerPixel);
             }
-
-            // Find the maximum value in the filtered data to scale the waveform vertically
             const maxVal = Math.max(...filteredData);
             const scale = canvasHeight / 2 / maxVal;
-
-            // Set the drawing style
-            ctx.fillStyle = '#3498db'; // A nice blue color for the waveform
+            ctx.fillStyle = '#3498db';
             ctx.beginPath();
-
-            // Draw the waveform as a series of vertical lines from the center
             for (let i = 0; i < filteredData.length; i++) {
                 const val = filteredData[i] * scale;
                 const y = (canvasHeight - val) / 2;
@@ -285,39 +228,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateTempo(event) {
             const tempoPercentage = parseFloat(event.target.value);
-            // Convert slider value (-8 to +8) to playbackRate
             this.playbackRate = 1.0 + (tempoPercentage / 100.0);
-
             if (this.sourceNode) {
                 this.sourceNode.playbackRate.value = this.playbackRate;
             }
-
-            // Update display
             const sign = tempoPercentage >= 0 ? '+' : '';
             this.tempoDisplay.textContent = `${sign}${tempoPercentage.toFixed(1)}%`;
         }
 
         loadMetadata(file) {
-            // Reset artwork and info for the new track
             this.albumArtElement.style.display = 'none';
             this.albumArtElement.src = '';
-            
             if (!window.jsmediatags) {
                 console.error("jsmediatags library not found.");
                 return;
             }
-
             window.jsmediatags.read(file, {
                 onSuccess: (tag) => {
                     const tags = tag.tags;
-                    
                     if (tags.title && tags.artist) {
                         this.trackInfo.textContent = `${tags.artist} - ${tags.title}`;
                     } else if (tags.title) {
                         this.trackInfo.textContent = tags.title;
                     }
-                    // If no title, the filename will be kept from the loadFile method.
-
                     if (tags.picture) {
                         const { data, format } = tags.picture;
                         let base64String = "";
@@ -334,61 +267,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- Scrubbing/Seeking Methods ---
         handleScrubbingStart(event) {
             if (!this.audioBuffer) return;
             this.isScrubbing = true;
-            // Immediately update position on first click
             this.handleScrubbingMove(event);
         }
 
         handleScrubbingMove(event) {
             if (!this.isScrubbing || !this.audioBuffer) return;
-
             const rect = this.progressContainer.getBoundingClientRect();
             const percent = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
             const seekTime = percent * this.audioBuffer.duration;
-
-            // Update progress bar and time display visually without changing audio
             this.progressBar.value = percent * 100;
             this.currentTimeDisplay.textContent = this.formatTime(seekTime);
-
-            // Update and show tooltip
             seekTooltip.style.left = `${event.pageX}px`;
-            seekTooltip.style.top = `${event.pageY - 35}px`; // Position above cursor
+            seekTooltip.style.top = `${event.pageY - 35}px`;
             seekTooltip.textContent = this.formatTime(seekTime);
             seekTooltip.style.display = 'block';
         }
 
         handleScrubbingEnd(event) {
             if (!this.isScrubbing) return;
-            
             this.isScrubbing = false;
             seekTooltip.style.display = 'none';
-
             const rect = this.progressContainer.getBoundingClientRect();
             const percent = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
             const seekTime = percent * this.audioBuffer.duration;
-            
             this.seek(seekTime);
         }
 
         seek(time) {
             if (!this.audioBuffer) return;
-
             this.pauseOffset = time;
-            
-            // If the track is currently playing, stop it and restart from the new position
             if (this.isPlaying) {
                 if(this.sourceNode) {
                     this.sourceNode.stop();
                 }
-                this.isPlaying = false; // This allows the play() method to create a new source
+                this.isPlaying = false;
                 this.play();
-            }
-            // If paused, the new pauseOffset will be picked up on the next play.
-            // We just need to update the UI to reflect the new position.
-            else {
+            } else {
                 this.progressBar.value = (this.pauseOffset / this.audioBuffer.duration) * 100;
                 this.currentTimeDisplay.textContent = this.formatTime(this.pauseOffset);
             }
@@ -398,25 +315,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const bufferLengthL = this.analyserNodeL.frequencyBinCount;
             const dataArrayL = new Float32Array(bufferLengthL);
             this.analyserNodeL.getFloatTimeDomainData(dataArrayL);
-
             const bufferLengthR = this.analyserNodeR.frequencyBinCount;
             const dataArrayR = new Float32Array(bufferLengthR);
             this.analyserNodeR.getFloatTimeDomainData(dataArrayR);
-
-            // Calculate RMS for Left channel
             let sumL = 0;
             for(let i = 0; i < dataArrayL.length; i++) {
                 sumL += dataArrayL[i] * dataArrayL[i];
             }
             const rmsL = Math.sqrt(sumL / dataArrayL.length);
-
-            // Calculate RMS for Right channel
             let sumR = 0;
             for(let i = 0; i < dataArrayR.length; i++) {
                 sumR += dataArrayR[i] * dataArrayR[i];
             }
             const rmsR = Math.sqrt(sumR / dataArrayR.length);
-
             this.drawMeter(this.vuMeterL, rmsL);
             this.drawMeter(this.vuMeterR, rmsR);
         }
@@ -425,21 +336,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const ctx = canvas.getContext('2d');
             const WIDTH = canvas.width;
             const HEIGHT = canvas.height;
-            const meterHeight = rmsValue * HEIGHT * 2.5; // Scale factor for visibility
-
+            const meterHeight = rmsValue * HEIGHT * 2.5;
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
-
-            // Create a gradient for the meter bar
             const gradient = ctx.createLinearGradient(0, HEIGHT, 0, 0);
-            gradient.addColorStop(0, '#00ff00');   // Green
-            gradient.addColorStop(0.75, '#ffff00'); // Yellow
-            gradient.addColorStop(1, '#ff0000');   // Red
-
+            gradient.addColorStop(0, '#00ff00');
+            gradient.addColorStop(0.75, '#ffff00');
+            gradient.addColorStop(1, '#ff0000');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, HEIGHT - meterHeight, WIDTH, meterHeight);
         }
 
-        // --- Drag and Drop Handlers ---
         handleDragOver(event) {
             event.preventDefault();
             this.deckElement.classList.add('drag-over');
@@ -453,7 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
         handleDrop(event) {
             event.preventDefault();
             this.deckElement.classList.remove('drag-over');
-            
             const file = event.dataTransfer.files[0];
             if (file) {
                 this.loadTrack(file);
@@ -461,11 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Instantiate Decks ---
     const deck1 = new Deck(1);
     const deck2 = new Deck(2);
 
-    // --- Master Controls ---
     const masterVolumeSlider = document.getElementById('master-volume');
     masterVolumeSlider.addEventListener('input', (e) => {
         masterGain.gain.value = e.target.value;
@@ -474,18 +377,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const crossfader = document.getElementById('crossfader');
     const setupCrossfader = () => {
         const value = parseFloat(crossfader.value);
-        // Use an equal-power crossfading curve for smooth transition
         const gain1 = Math.cos((value + 1) * 0.25 * Math.PI);
         const gain2 = Math.cos((1 - value) * 0.25 * Math.PI);
-        
         deck1.crossfaderGainNode.gain.value = gain1;
         deck2.crossfaderGainNode.gain.value = gain2;
     };
     crossfader.addEventListener('input', setupCrossfader);
-    // Initialize crossfader gains
     setupCrossfader();
 
-    // --- Spectrum Analyzer ---
     const spectrumCanvas = document.getElementById('master-spectrum');
     const spectrumCtx = spectrumCanvas.getContext('2d');
     const bufferLength = analyser.frequencyBinCount;
@@ -493,33 +392,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawSpectrum() {
         requestAnimationFrame(drawSpectrum);
-
         analyser.getByteFrequencyData(dataArray);
-
         spectrumCtx.fillStyle = '#000';
         spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
-
         const barWidth = (spectrumCanvas.width / bufferLength) * 2;
         let x = 0;
-
         for (let i = 0; i < bufferLength; i++) {
             const barHeight = dataArray[i] / 2;
-            
-            // Simple color gradient from blue to red
             const r = 70 + (barHeight * 1.5);
             const g = 100;
             const b = 250 - (barHeight);
-
             spectrumCtx.fillStyle = `rgb(${r},${g},${b})`;
             spectrumCtx.fillRect(x, spectrumCanvas.height - barHeight, barWidth, barHeight);
-
             x += barWidth + 1;
         }
     }
     drawSpectrum();
 
-
-    // --- Utility Controls (Export/Import) ---
     const exportBtn = document.getElementById('export-btn');
     const importBtn = document.getElementById('import-btn');
 
@@ -540,11 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 crossfader: crossfader.value,
             },
         };
-
         const jsonString = JSON.stringify(sessionState, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        
         const a = document.createElement('a');
         a.href = url;
         a.download = 'djay_session.json';
@@ -561,7 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
         input.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
@@ -578,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applySessionState(state) {
-        // Apply Deck 1 state
         if (state.deck1) {
             deck1.volumeSlider.value = state.deck1.volume;
             deck1.gainNode.gain.value = state.deck1.volume;
@@ -589,8 +474,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 deck1.trackInfo.textContent = `Please load: ${state.deck1.trackName}`;
             }
         }
-
-        // Apply Deck 2 state
         if (state.deck2) {
             deck2.volumeSlider.value = state.deck2.volume;
             deck2.gainNode.gain.value = state.deck2.volume;
@@ -601,13 +484,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 deck2.trackInfo.textContent = `Please load: ${state.deck2.trackName}`;
             }
         }
-
-        // Apply Master state
         if (state.master) {
             masterVolumeSlider.value = state.master.volume;
             masterGain.gain.value = state.master.volume;
             crossfader.value = state.master.crossfader;
-            setupCrossfader(); // Apply crossfader gain changes
+            setupCrossfader();
         }
     }
 
