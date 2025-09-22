@@ -4,19 +4,22 @@ body {
     background-color: #1a1a1a;
     color: #f0f0f0;
     margin: 0;
-    padding: 2rem;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    min-height: 100vh;
 }
 
 #app-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1600px;
+    min-height: 100vh;
     background-color: #2a2a2a;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 2rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
 }
 
 h1, h2 {
@@ -31,8 +34,8 @@ h1, h2 {
 .decks-container {
     display: flex;
     justify-content: space-between;
-    gap: 2rem;
-    margin-bottom: 2rem;
+    gap: 1rem;
+    height: calc(100vh - 6rem); /* Full height minus padding and header */
 }
 
 .deck {
@@ -41,13 +44,19 @@ h1, h2 {
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
 }
 
 .master-controls {
+    flex: 1;
     background-color: #333;
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Deck Elements */
@@ -85,13 +94,13 @@ canvas {
 progress {
     width: 100%;
     height: 10px;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
 }
 
 /* Controls */
 .controls {
     display: flex;
-    flex-direction: column; /* Stack control rows vertically */
+    flex-direction: column;
     gap: 0.5rem;
 }
 
@@ -132,30 +141,101 @@ input[type="range"] {
     flex-grow: 1;
 }
 
-/* Master Controls Specifics */
-.crossfader-container, .master-volume-container {
+/* Mixer Controls */
+.mixer-controls {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 1rem;
-    padding: 0.5rem;
-    width: 50%;
+    width: 100%;
+}
+
+.volume-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    gap: 1rem;
+}
+
+.deck-volume-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 60px; /* Ensure enough space for vertical sliders */
+}
+
+.volume-slider {
+    -webkit-appearance: none; /* Reset default appearance */
+    appearance: none;
+    width: 100px; /* Horizontal length of the slider */
+    height: 8px; /* Thin track height */
+    background: #444; /* Track color */
+    outline: none;
+    transform: rotate(270deg); /* Rotate to make vertical */
+    transform-origin: center;
+    margin: 0 auto; /* Center horizontally */
+    border-radius: 4px;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.crossfader-container, .master-volume-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 80%;
     margin: 0 auto;
+}
+
+label {
+    text-align: center;
+    font-size: 0.9em;
 }
 
 .utility-controls {
     margin-top: 1rem;
     border-top: 1px solid #444;
     padding-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
 }
 
-
 /* Responsive Design */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
     .decks-container {
         flex-direction: column;
+        height: auto;
+    }
+    .deck, .master-controls {
+        flex: none;
+        width: 100%;
     }
     .crossfader-container, .master-volume-container {
-        width: 80%;
+        width: 100%;
+    }
+    .volume-row {
+        flex-direction: column;
+        align-items: center;
     }
 }
 
@@ -165,7 +245,7 @@ input[type="range"] {
 }
 
 .tempo-display {
-    min-width: 4.5em; /* Reserve space to prevent layout shifts */
+    min-width: 4.5em;
     text-align: right;
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.9em;
@@ -173,7 +253,7 @@ input[type="range"] {
 
 /* Album Art Display */
 .album-art {
-    display: none; /* Hidden by default, shown via JS */
+    display: none;
     width: 120px;
     height: 120px;
     object-fit: cover;
@@ -199,25 +279,21 @@ input[type="range"] {
     padding: 5px 0;
 }
 
-/* Override default progress margin since the container has it now */
 progress {
-    width: 100%;
-    height: 10px;
-    margin-bottom: 0; 
-    pointer-events: none; /* Clicks should be handled by the container */
+    pointer-events: none;
 }
 
 .seek-tooltip {
     position: absolute;
-    display: none; /* Hidden by default */
+    display: none;
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
     font-size: 0.9em;
-    pointer-events: none; /* Tooltip should not capture mouse events */
+    pointer-events: none;
     z-index: 100;
-    transform: translateX(-50%); /* Center the tooltip horizontally on the cursor */
+    transform: translateX(-50%);
     white-space: nowrap;
 }
 

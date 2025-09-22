@@ -5,27 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DJay.ca MixKit</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JFBJ7VTWXF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-JFBJ7VTWXF');
-</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 </head>
 <body>
-
     <div id="app-container">
-    <div id="seek-tooltip" class="seek-tooltip">00:00</div>
-        <h1>DJay.ca MixKit</h1>
-
         <div class="decks-container">
-            <!-- DECK 1 -->
+            <!-- Deck 1 -->
             <div class="deck" id="deck1">
                 <h2>Deck 1</h2>
-                <img id="album-art-1" class="album-art" src="" alt="Album Art">
+                <img id="album-art-1" class="album-art" alt="Album Art">
                 <div class="track-info" id="track-info-1">No track loaded</div>
                 <div class="waveform-container">
                     <canvas id="waveform-1"></canvas>
@@ -36,35 +24,61 @@
                 <div class="progress-bar-container" id="progress-container-1">
                     <progress id="progress-1" value="0" max="100"></progress>
                 </div>
+                <div class="vu-meter-container">
+                    <canvas id="vu-meter-L-1" width="20" height="50"></canvas>
+                    <canvas id="vu-meter-R-1" width="20" height="50"></canvas>
+                </div>
                 <div class="controls">
-                    <div class="control-row file-input-row">
-                        <input type="file" id="file-input-1" accept=".mp3,.flac,.aac,.m4a,.wav" class="file-input">
-                    </div>
                     <div class="control-row main-controls-row">
+                        <input type="file" id="file-input-1" accept="audio/*" class="file-input">
                         <button id="play-pause-btn-1">Play</button>
                         <button id="stop-btn-1">Stop</button>
                         <button id="loop-btn-1">Loop: Off</button>
-                        <div class="vu-meter-container">
-                            <canvas id="vu-meter-L-1" width="10" height="50"></canvas>
-                            <canvas id="vu-meter-R-1" width="10" height="50"></canvas>
-                        </div>
                     </div>
-                    <div class="control-row slider-row">
-                        <label>Volume:</label>
-                        <input type="range" id="volume-1" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
-                    </div>
-                    <div class="control-row slider-row">
-                        <label>Tempo:</label>
+                    <div class="control-row">
+                        <span>Tempo:</span>
                         <input type="range" id="tempo-slider-1" min="-8" max="8" step="0.1" value="0" class="tempo-slider">
                         <span id="tempo-display-1" class="tempo-display">+0.0%</span>
                     </div>
                 </div>
             </div>
 
-            <!-- DECK 2 -->
+            <!-- Mixer -->
+            <div class="master-controls">
+                <h2>Mixer</h2>
+                <div class="mixer-controls">
+                    <div class="volume-row">
+                        <div class="deck-volume-container">
+                            <input type="range" id="volume-1" min="0" max="1" step="0.01" value="1" class="volume-slider">
+                            <label for="volume-1">Deck 1</label>
+                        </div>
+                        <div class="deck-volume-container">
+                            <input type="range" id="volume-2" min="0" max="1" step="0.01" value="1" class="volume-slider">
+                            <label for="volume-2">Deck 2</label>
+                        </div>
+                    </div>
+                    <div class="crossfader-container">
+                        <input type="range" id="crossfader" min="-1" max="1" step="0.01" value="0">
+                        <label for="crossfader">Crossfader</label>
+                    </div>
+                    <div class="master-volume-container">
+                        <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
+                        <label for="master-volume">Master Volume</label>
+                    </div>
+                    <div class="spectrum-canvas">
+                        <canvas id="master-spectrum"></canvas>
+                    </div>
+                    <div class="utility-controls">
+                        <button id="export-btn">Export Session</button>
+                        <button id="import-btn">Import Session</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deck 2 -->
             <div class="deck" id="deck2">
                 <h2>Deck 2</h2>
-                <img id="album-art-2" class="album-art" src="" alt="Album Art">
+                <img id="album-art-2" class="album-art" alt="Album Art">
                 <div class="track-info" id="track-info-2">No track loaded</div>
                 <div class="waveform-container">
                     <canvas id="waveform-2"></canvas>
@@ -75,51 +89,27 @@
                 <div class="progress-bar-container" id="progress-container-2">
                     <progress id="progress-2" value="0" max="100"></progress>
                 </div>
+                <div class="vu-meter-container">
+                    <canvas id="vu-meter-L-2" width="20" height="50"></canvas>
+                    <canvas id="vu-meter-R-2" width="20" height="50"></canvas>
+                </div>
                 <div class="controls">
-                     <div class="control-row file-input-row">
-                        <input type="file" id="file-input-2" accept=".mp3,.flac,.aac,.m4a,.wav" class="file-input">
-                    </div>
                     <div class="control-row main-controls-row">
+                        <input type="file" id="file-input-2" accept="audio/*" class="file-input">
                         <button id="play-pause-btn-2">Play</button>
                         <button id="stop-btn-2">Stop</button>
                         <button id="loop-btn-2">Loop: Off</button>
-                        <div class="vu-meter-container">
-                            <canvas id="vu-meter-L-2" width="10" height="50"></canvas>
-                            <canvas id="vu-meter-R-2" width="10" height="50"></canvas>
-                        </div>
                     </div>
-                    <div class="control-row slider-row">
-                        <label>Volume:</label>
-                        <input type="range" id="volume-2" min="0" max="1" step="0.01" value="0.8" class="volume-slider">
-                    </div>
-                     <div class="control-row slider-row">
-                        <label>Tempo:</label>
+                    <div class="control-row">
+                        <span>Tempo:</span>
                         <input type="range" id="tempo-slider-2" min="-8" max="8" step="0.1" value="0" class="tempo-slider">
                         <span id="tempo-display-2" class="tempo-display">+0.0%</span>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="master-controls">
-            <h2>Master Controls</h2>
-            <canvas id="master-spectrum" class="spectrum-canvas"></canvas>
-            <div class="crossfader-container">
-                <label>Crossfader</label>
-                <input type="range" id="crossfader" min="-1" max="1" step="0.01" value="0">
-            </div>
-            <div class="master-volume-container">
-                <label>Master Volume</label>
-                <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
-            </div>
-            <div class="utility-controls">
-                <button id="export-btn">Export Session</button>
-                <button id="import-btn">Import Session</button>
-            </div>
-        </div>
+        <div id="seek-tooltip" class="seek-tooltip"></div>
     </div>
-
-    <script src="jsmediatags.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
