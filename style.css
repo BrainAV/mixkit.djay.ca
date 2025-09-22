@@ -160,9 +160,10 @@ input[type="range"] {
 
 .deck-volume-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse; /* Reverse order to place label below slider */
     align-items: center;
     gap: 0.5rem;
+    min-height: 120px; /* Ensure enough space for slider and label */
     min-width: 60px; /* Ensure enough space for vertical sliders */
 }
 
