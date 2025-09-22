@@ -8,19 +8,18 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100vh; /* Full viewport height */
+    min-height: 100vh;
 }
 
 #app-container {
     width: 100%;
-    max-width: 1400px; /* Increased max-width for better spacing */
+    max-width: 1600px;
+    min-height: 100vh;
     background-color: #2a2a2a;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 2rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    min-height: 100vh; /* Ensure container takes full height */
-    display: flex;
-    flex-direction: column;
+    box-sizing: border-box;
 }
 
 h1, h2 {
@@ -35,9 +34,8 @@ h1, h2 {
 .decks-container {
     display: flex;
     justify-content: space-between;
-    gap: 2rem;
-    flex: 1; /* Allow decks to take available space */
-    margin-bottom: 2rem;
+    gap: 1rem;
+    height: calc(100vh - 6rem); /* Full height minus padding and header */
 }
 
 .deck {
@@ -46,13 +44,19 @@ h1, h2 {
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
 }
 
 .master-controls {
+    flex: 1;
     background-color: #333;
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Deck Elements */
@@ -91,7 +95,6 @@ progress {
     width: 100%;
     height: 10px;
     margin-bottom: 0;
-    pointer-events: none;
 }
 
 /* Controls */
@@ -138,67 +141,64 @@ input[type="range"] {
     flex-grow: 1;
 }
 
-/* Mixer Section */
-.mixer-container {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-bottom: 1rem;
-}
-
-.mixer-control {
+/* Mixer Controls */
+.mixer-controls {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-}
-
-.mixer-control input[type="range"][orient="vertical"] {
-    writing-mode: bt-lr; /* For vertical orientation */
-    -webkit-appearance: slider-vertical; /* For WebKit browsers */
-    width: 20px; /* Width of the slider */
-    height: 100px; /* Height of the slider */
-}
-
-.mixer-control label {
-    text-align: center;
-    font-size: 0.9rem;
-}
-
-.crossfader-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 50%;
-    margin: 0 auto;
-    gap: 0.5rem;
-}
-
-.crossfader-container input[type="range"] {
+    gap: 1rem;
     width: 100%;
 }
 
-/* Utility Controls */
+.deck-volume-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.volume-slider {
+    -webkit-appearance: slider-vertical;
+    writing-mode: bt-lr; /* Bottom-to-top for vertical orientation */
+    height: 100px;
+    width: 20px;
+}
+
+.crossfader-container, .master-volume-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 80%;
+    margin: 0 auto;
+}
+
+label {
+    text-align: center;
+    font-size: 0.9em;
+}
+
 .utility-controls {
     margin-top: 1rem;
     border-top: 1px solid #444;
     padding-top: 1rem;
     display: flex;
+    gap: 0.5rem;
     justify-content: center;
-    gap: 1rem;
 }
 
 /* Responsive Design */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
     .decks-container {
         flex-direction: column;
+        height: auto;
     }
-    .mixer-container {
-        flex-direction: column;
-        align-items: center;
+    .deck, .master-controls {
+        flex: none;
+        width: 100%;
     }
-    .crossfader-container {
-        width: 80%;
+    .crossfader-container, .master-volume-container {
+        width: 100%;
     }
 }
 
@@ -240,6 +240,10 @@ input[type="range"] {
 .progress-bar-container {
     cursor: pointer;
     padding: 5px 0;
+}
+
+progress {
+    pointer-events: none;
 }
 
 .seek-tooltip {
