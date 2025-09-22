@@ -159,13 +159,15 @@ input[type="range"] {
 }
 
 .volume-slider {
-    -webkit-appearance: slider-vertical; /* Chrome, Safari, Edge */
-    -moz-appearance: slider-vertical; /* Firefox */
-    appearance: slider-vertical; /* Standard */
-    writing-mode: bt-lr; /* Bottom-to-top for vertical orientation */
-    height: 100px; /* Explicit height for vertical slider */
-    width: 8px; /* Narrow width for slider track */
+    -webkit-appearance: none; /* Reset default appearance */
+    appearance: none;
+    width: 100px; /* Horizontal length of the slider */
+    height: 8px; /* Thin track height */
     background: #444; /* Track color */
+    outline: none;
+    transform: rotate(270deg); /* Rotate to make vertical */
+    transform-origin: center;
+    margin: 0 auto; /* Center horizontally */
     border-radius: 4px;
 }
 
