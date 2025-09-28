@@ -28,6 +28,7 @@ h1, h2 {
     border-bottom: 2px solid #444;
     padding-bottom: 0.5rem;
     margin-top: 0;
+    margin-bottom: 3rem; /* Increased bottom margin significantly */
 }
 
 /* Layout */
@@ -146,8 +147,9 @@ input[type="range"] {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 2rem; /* Increased gap between mixer elements */
     width: 100%;
+    margin-top: 2rem; /* Increased top margin to push content down more from title */
 }
 
 .volume-row {
@@ -212,9 +214,9 @@ label {
 }
 
 .utility-controls {
-    margin-top: 1rem;
+    margin-top: 1.5rem; /* Increased margin for better separation */
     border-top: 1px solid #444;
-    padding-top: 1rem;
+    padding-top: 1.5rem; /* Increased padding for better separation */
     display: flex;
     gap: 0.5rem;
     justify-content: center;
@@ -233,8 +235,10 @@ label {
     .crossfader-container, .master-volume-container {
         width: 100%;
     }
+    /* Keep volume sliders side by side on mobile */
     .volume-row {
-        flex-direction: column;
+        flex-direction: row; /* Changed from column to row */
+        justify-content: space-around;
         align-items: center;
     }
 }
