@@ -5,21 +5,18 @@ body {
     color: #f0f0f0;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden; /* Prevent scrolling for full-screen app */
 }
 
 #app-container {
-    width: 100%;
-    max-width: 1600px;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
     background-color: #2a2a2a;
-    border-radius: 0;
-    padding: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    padding: 1rem;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 h1, h2 {
@@ -28,7 +25,7 @@ h1, h2 {
     border-bottom: 2px solid #444;
     padding-bottom: 0.5rem;
     margin-top: 0;
-    margin-bottom: 3rem; /* Increased bottom margin significantly */
+    margin-bottom: 1rem; /* Reduced margin for better space utilization */
 }
 
 /* Layout */
@@ -36,28 +33,31 @@ h1, h2 {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    height: calc(100vh - 6rem); /* Full height minus padding and header */
+    flex: 1; /* Take up remaining space */
+    min-height: 0; /* Allow flexbox to shrink */
 }
 
 .deck {
     flex: 1;
     background-color: #333;
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 8px;
     border: 1px solid #444;
     display: flex;
     flex-direction: column;
+    min-height: 0; /* Allow flexbox to work properly */
 }
 
 .master-controls {
     flex: 1;
     background-color: #333;
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 8px;
     border: 1px solid #444;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 0; /* Allow flexbox to work properly */
 }
 
 /* Deck Elements */
@@ -76,7 +76,8 @@ h1, h2 {
 
 .waveform-container {
     background-color: #000;
-    height: 100px;
+    flex: 1; /* Take up available space */
+    min-height: 80px; /* Minimum height */
     margin-bottom: 1rem;
     border-radius: 4px;
 }
@@ -147,9 +148,11 @@ input[type="range"] {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem; /* Increased gap between mixer elements */
+    gap: 1.5rem;
     width: 100%;
-    margin-top: 2rem; /* Increased top margin to push content down more from title */
+    flex: 1; /* Take up remaining space in mixer */
+    justify-content: flex-start; /* Start from top but with margin */
+    margin-top: 2rem; /* Add the spacing back from the title */
 }
 
 .volume-row {
@@ -243,6 +246,30 @@ label {
     }
 }
 
+/* Force landscape orientation for mobile */
+@media (max-width: 768px) and (orientation: portrait) {
+    body::before {
+        content: "Please rotate your device to landscape mode";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #1a1a1a;
+        color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        text-align: center;
+        z-index: 9999;
+    }
+    
+    #app-container {
+        display: none;
+    }
+}
+
 /* Tempo Control Specifics */
 .tempo-slider {
     flex-grow: 1;
@@ -270,7 +297,8 @@ label {
 /* Spectrum Analyzer */
 .spectrum-canvas {
     width: 100%;
-    height: 80px;
+    flex: 1; /* Take up available space */
+    min-height: 60px; /* Minimum height */
     background-color: #000;
     border-radius: 4px;
     margin-bottom: 1rem;
