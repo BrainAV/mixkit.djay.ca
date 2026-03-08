@@ -13,11 +13,13 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
 | Feature | What It Does |
 |---------|--------------|
 | **Load Local Audio** | Browse and select common audio files (`.mp3`, `.wav`, `.flac`, etc.) from your computer for instant playback. |
+| **WebGL Visuals** | GPU-accelerated Waveforms, VU Meters, and Master Spectrum for 60fps professional feedback. |
+| **Stutter-Cueing** | Audio feedback with 50ms "chattering" bursts for precise CUE point selection during scrubbing. |
+| **Momentary Pitch Bend** | Professional +/- nudge buttons for temporary playback rate adjustments. |
+| **Settings Overlay** | Slide-over modal for live-tuning (Tempo Range, Crossfader Curve, UI Theme). |
+| **localStorage Persistence** | All user settings and session preferences now persist across browser restarts. |
 | **MP3 Metadata Display** | Shows track title, artist, and album art from the file's ID3 tags. |
 | **Deck Controls** | Play, pause, stop, loop (repeat), and crossfade between tracks. |
-| **Manual Tempo Control** | Adjust playback speed by +/- 8% for manual beatmatching. |
-| **Visual Feedback** | Progress bar, elapsed/total time, and a waveform preview for each deck. |
-| **Master Spectrum Analyzer** | Provides a real-time visualization of the master output's frequency spectrum. |
 | **Export Settings** | Save your current mix state as a JSON file; reload later to pick up where you left off. |
 
 ---
@@ -53,7 +55,9 @@ The application is built using a modular ES6 architecture, leveraging a centrali
 
 -   **Modular vanilla JS** – No frameworks or build steps; uses native ES6 modules.
 -   **Advanced State Management** – Uses a reactive Pub/Sub architecture for robust, scalable feature development.
--   **Web Audio API** – High-performance audio processing and analysis.
+-   **WebGL 2.0 Rendering** – High-performance GPU-accelerated rendering for all visual components.
+-   **Zero-Allocation Pipeline** – Optimized 60fps loops with pre-allocated buffers to prevent GC jank.
+-   **Web Audio API** – Professional-grade audio processing, analysis, and stutter-cueing.
 -   **Responsive Design** – Premium glassmorphism aesthetic tailored for desktop and mobile.
 
 ---
@@ -71,12 +75,12 @@ The application is built using a modular ES6 architecture, leveraging a centrali
 
 ### Future Enhancements (Roadmap)
 
-- ⚙️ Settings button with overlay window for options.
-- 🎶 Playlist with autoplay.
-- 🎚️ Built‑in effects: reverb, delay, distortion.  
-- 🔊 Advanced beat‑matching & tempo sync (automatic BPM detection).  
-- 🎹 Key-lock (pitch correction during tempo changes).
-- 📱 Mobile‑friendly UI.
+- 🎛️ **3-Band EQ**: Dedicated High, Mid, and Low filters per channel.
+- 🎶 **Playlist Manager**: Persistent queue with drag-and-drop support.
+- 🎹 **Key-Lock (Master Tempo)**: Maintain musical key during tempo adjustments.
+- 🔊 **Built-in Effects**: Reverb, Delay, and Low-pass filters.
+- 📱 **Mobile UI Phase 2**: Touch-optimized jog wheels and adaptive layouts.
+- 🎹 **MIDI Controller Support**: Universal mapping for physical DJ hardware.
 
 Feel free to fork the repo, tweak the CSS, or add your own features—DJay.ca MixKit (WEB) is designed for easy extension.
 
