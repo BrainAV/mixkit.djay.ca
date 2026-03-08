@@ -20,7 +20,12 @@ This document outlines the future enhancements and planned features for the DJay
 - [ ] **Professional Visual Feedback:** Upgrade the VU meters to stereo LED-style readouts and refine the waveform overlays (playheads, cue markers).
 - [ ] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles).
 - [ ] **Persistent Settings (localStorage):** Remember the user's settings, custom crossfader curves, and visual preferences across browser sessions.
-- [ ] **Mobile-Friendly UI Overhaul:** Improve the layout for tablets and mobile devices with larger touch targets and a responsive, potentially stackable two-deck view.
+- [ ] **Mobile-Friendly UI Revamp (Phase 1):**
+    - **Adaptive Layouts:** Automatically switch between side-by-side (tablet/desktop) and stacked (phone) deck views.
+    - **Touch-Optimized Controls:** Increase tap target sizes for Play/CUE/Sync buttons (min 44x44px per WCAG).
+    - **Bottom-Sheet Settings:** Move complex mixer and application settings into a slide-up gesture-aware modal.
+    - **Gesture Support:** Implement long-press for hot cue assignment and vertical swipes for library navigation.
+    - **Pinch-to-Zoom Waveforms:** Allow users to adjust the visual zoom level of the waveform via multi-touch gestures.
 - [ ] **Dark Mode / Console Theming:** Provide a "Pro Dark" theme toggle alongside our glassmorphism aesthetics, utilizing high-contrast hardware layouts.
 
 ### 3. Track Management & Workflow
