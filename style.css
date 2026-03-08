@@ -376,3 +376,117 @@ progress {
 .nudge-btn:hover {
     background: rgba(255, 255, 255, 0.2);
 }
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content.glass {
+    background: rgba(42, 42, 42, 0.8);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.setting-item label {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.setting-item select, .setting-item input {
+    background: #333;
+    color: white;
+    border: 1px solid #444;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+}
+
+.close-btn {
+    padding: 0.7rem 2rem;
+    background: #444;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: #555;
+}
+
+.settings-btn {
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+}
+
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Pro Dark Theme Overrides */
+body.pro-dark {
+    background-color: #050505;
+}
+
+body.pro-dark #app-container {
+    background-color: #0a0a0a;
+}
+
+body.pro-dark h1, body.pro-dark h2 {
+    border-color: #222;
+}
+
+body.pro-dark .deck, body.pro-dark .master-controls {
+    background-color: #111;
+    border-color: #222;
+}
+
+body.pro-dark .track-info, body.pro-dark .spectrum-canvas {
+    background-color: #000;
+}
+
+body.pro-dark button {
+    background-color: #222;
+    border-color: #333;
+}
+
+body.pro-dark button:hover {
+    background-color: #333;
+}

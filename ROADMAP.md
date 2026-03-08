@@ -18,7 +18,8 @@ This document outlines the future enhancements and planned features for the DJay
 - [ ] **Jog Wheels:** Introduce interactive jog wheels for track scrubbing/scratching, featuring center-aligned album art inspired by professional controllers.
 - [ ] **Hot Cues:** Add assignable Hot Cue buttons (1-8) for jumping to specific markers within a track.
 - [ ] **Professional Visual Feedback:** Upgrade the VU meters to stereo LED-style readouts and refine the waveform overlays (playheads, cue markers).
-- [ ] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles).
+- [ ] **Progressive Waveform Rendering:** Draw the waveform data in real-time as the file is decoded/buffered, rather than waiting for the full decode to complete.
+- [ ] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles). [DONE]
 - [ ] **Persistent Settings (localStorage):** Remember the user's settings, custom crossfader curves, and visual preferences across browser sessions.
 - [ ] **Mobile-Friendly UI Revamp (Phase 1):**
     - **Adaptive Layouts:** Automatically switch between side-by-side (tablet/desktop) and stacked (phone) deck views.
@@ -43,6 +44,10 @@ This document outlines the future enhancements and planned features for the DJay
 - [ ] **Advanced Beat-Matching & Tempo Sync:** Research robust automatic BPM detection and 'SYNC' logic (currently low priority).
 
 ## 🛠 Active Technical Improvements
+- [ ] **GPU-Accelerated Rendering (WebGL/WebGPU):** Transition from Canvas 2D to WebGL for high-frequency waveform and spectrum rendering to reduce CPU overhead and support thousands of vertex points.
+- [ ] **High-Definition Spectrum Analyzer:** Use WebGL shaders for the Master Spectrum to allow for smooth 60fps gradients and peak-holding visualizations.
+- [ ] **Performance Monitoring Overlay:** Add an optional FPS/CPU/Memory usage overlay (similar to `stats.js`) for real-time performance auditing.
+- [ ] **Offscreen Canvas Workers:** Offload heavy waveform calculation and rendering to Web Workers to keep the main thread fluid for audio and UI events.
 - [ ] Refactor Web Audio API context usage to ensure peak efficiency across multiple decks and a single analyzer.
 - [ ] Adopt stricter ESLint and Prettier rules for the codebase.
 

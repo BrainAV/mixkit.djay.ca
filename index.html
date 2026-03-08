@@ -73,6 +73,7 @@
                         <canvas id="master-spectrum"></canvas>
                     </div>
                     <div class="utility-controls">
+                        <button id="settings-toggle-btn" class="settings-btn" title="Settings">⚙️</button>
                         <button id="export-btn">Export Session</button>
                         <button id="import-btn">Import Session</button>
                     </div>
@@ -117,6 +118,44 @@
             </div>
         </div>
         <div id="seek-tooltip" class="seek-tooltip"></div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content glass">
+            <h2>Settings</h2>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label for="setting-tempo-range">Tempo Range:</label>
+                    <select id="setting-tempo-range">
+                        <option value="8">±8%</option>
+                        <option value="16">±16%</option>
+                        <option value="50">±50%</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="setting-crossfader-curve">Crossfader Curve:</label>
+                    <select id="setting-crossfader-curve">
+                        <option value="linear">Linear</option>
+                        <option value="power">Constant Power</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="setting-latency">Audio Latency (ms):</label>
+                    <input type="number" id="setting-latency" min="5" max="250" step="1">
+                </div>
+                <div class="setting-item">
+                    <label for="setting-theme">Theme:</label>
+                    <select id="setting-theme">
+                        <option value="glass">Glassmorphism</option>
+                        <option value="dark">Pro Dark</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="settings-close-btn" class="close-btn">Close</button>
+            </div>
+        </div>
+    </div>
     </div>
     <script type="module" src="js/main.js"></script>
 </body>

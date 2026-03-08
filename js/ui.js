@@ -15,14 +15,36 @@ class UIEngine {
             importBtn: document.getElementById('import-btn'),
             spectrumCanvas: document.getElementById('master-spectrum')
         };
+        
+        // WebGL for Master Spectrum
+        this.gl = this.initWebGLSpectrum();
+        this.peaks = new Float32Array(audioEngine.analyser.frequencyBinCount);
+        this.peakHoldValues = new Float32Array(audioEngine.analyser.frequencyBinCount);
+        this.lastPeakUpdate = 0;
+
+        this.settings = {
+            modal: document.getElementById('settings-modal'),
+            toggleBtn: document.getElementById('settings-toggle-btn'),
+            closeBtn: document.getElementById('settings-close-btn'),
+            tempoRange: document.getElementById('setting-tempo-range'),
+            crossfaderCurve: document.getElementById('setting-crossfader-curve'),
+            latency: document.getElementById('setting-latency'),
+            theme: document.getElementById('setting-theme')
+        };
 
         this.seekTooltip = document.getElementById('seek-tooltip');
+
+        // Offscreen canvases for static waveform data
+        this.offscreenWaveforms = {
+            1: document.createElement('canvas'),
+            2: document.createElement('canvas')
+        };
 
         this.setupEventListeners();
         stateManager.subscribe(this.render.bind(this));
 
-        // Start drawing spectrum
-        this.drawSpectrum();
+        // Start global animation loop for spectrum and waveforms
+        this.startAnimationLoop();
     }
 
     getDeckElements(deckId) {
@@ -136,6 +158,32 @@ class UIEngine {
         
         this.master.exportBtn.addEventListener('click', () => this.exportSession());
         this.master.importBtn.addEventListener('click', () => this.importSession());
+
+        // Settings Listeners
+        this.settings.toggleBtn.addEventListener('click', () => this.toggleSettings(true));
+        this.settings.closeBtn.addEventListener('click', () => this.toggleSettings(false));
+        
+        this.settings.tempoRange.addEventListener('change', (e) => stateManager.setSetting('tempoRange', parseInt(e.target.value)));
+        this.settings.crossfaderCurve.addEventListener('change', (e) => stateManager.setSetting('crossfaderCurve', e.target.value));
+        this.settings.latency.addEventListener('input', (e) => stateManager.setSetting('latency', parseInt(e.target.value)));
+        this.settings.theme.addEventListener('change', (e) => stateManager.setSetting('theme', e.target.value));
+
+        // Click outside modal to close
+        this.settings.modal.addEventListener('click', (e) => {
+            if (e.target === this.settings.modal) this.toggleSettings(false);
+        });
+    }
+
+    toggleSettings(show) {
+        this.settings.modal.style.display = show ? 'flex' : 'none';
+        if (show) {
+            // Populate inputs with current state
+            const state = stateManager.getState().settings;
+            this.settings.tempoRange.value = state.tempoRange;
+            this.settings.crossfaderCurve.value = state.crossfaderCurve;
+            this.settings.latency.value = state.latency;
+            this.settings.theme.value = state.theme;
+        }
     }
 
     async handleFileSelect(deckId, file) {
@@ -233,6 +281,73 @@ class UIEngine {
 
     // --- RENDER PIPELINE ---
 
+    startAnimationLoop() {
+        const loop = () => {
+            requestAnimationFrame(loop);
+            this.drawSpectrum();
+            this.drawWaveforms();
+        };
+        loop();
+    }
+
+    drawWaveforms() {
+        const state = stateManager.getState();
+        [1, 2].forEach(deckId => {
+            const deckState = state.decks[deckId];
+            const canvas = this.decks[deckId].waveformCanvas;
+            const ctx = canvas.getContext('2d');
+            const offscreen = this.offscreenWaveforms[deckId];
+
+            if (!deckState.duration) return;
+
+            // 1. Clear and draw static waveform
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(offscreen, 0, 0);
+
+            // 2. Draw Playhead
+            const progress = deckState.currentTime / deckState.duration;
+            const playheadX = progress * canvas.width;
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff'; // White playhead
+            ctx.beginPath();
+            ctx.moveTo(playheadX, 0);
+            ctx.lineTo(playheadX, canvas.height);
+            ctx.stroke();
+
+            // 3. Optional: Subtle overlay for "already played" section
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(0, 0, playheadX, canvas.height);
+        });
+    }
+
+    drawWaveform(deckId, audioBuffer) {
+        const mainCanvas = this.decks[deckId].waveformCanvas;
+        const offscreen = this.offscreenWaveforms[deckId];
+        
+        // Match offscreen size to main canvas
+        offscreen.width = mainCanvas.width;
+        offscreen.height = mainCanvas.height;
+        
+        const ctx = offscreen.getContext('2d');
+        const channelData = audioBuffer.getChannelData(0);
+        ctx.clearRect(0, 0, offscreen.width, offscreen.height);
+        
+        const samplesPerPixel = Math.floor(channelData.length / offscreen.width);
+        const filteredData = [];
+        for (let i = 0; i < offscreen.width; i++) {
+            let sum = 0;
+            for (let j = 0; j < samplesPerPixel; j++) sum += Math.abs(channelData[i * samplesPerPixel + j] || 0);
+            filteredData.push(sum / samplesPerPixel);
+        }
+        const scale = offscreen.height / 2 / Math.max(...filteredData);
+        ctx.fillStyle = '#3498db';
+        for (let i = 0; i < filteredData.length; i++) {
+            const val = filteredData[i] * scale;
+            ctx.fillRect(i, (offscreen.height - val) / 2, 1, val);
+        }
+    }
+
     render(newState, oldState) {
         [1, 2].forEach(deckId => {
             const state = newState.decks[deckId];
@@ -300,27 +415,24 @@ class UIEngine {
         // Master UI
         if (!oldState || newState.master.volume !== oldState.master.volume) this.master.volume.value = newState.master.volume;
         if (!oldState || newState.master.crossfader !== oldState.master.crossfader) this.master.crossfader.value = newState.master.crossfader;
-    }
 
-    drawWaveform(deckId, audioBuffer) {
-        const canvas = this.decks[deckId].waveformCanvas;
-        const ctx = canvas.getContext('2d');
-        const channelData = audioBuffer.getChannelData(0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const samplesPerPixel = Math.floor(channelData.length / canvas.width);
-        const filteredData = [];
-        for (let i = 0; i < canvas.width; i++) {
-            let sum = 0;
-            for (let j = 0; j < samplesPerPixel; j++) sum += Math.abs(channelData[i * samplesPerPixel + j] || 0);
-            filteredData.push(sum / samplesPerPixel);
+        // Settings UI Reactivity
+        if (!oldState || newState.settings.tempoRange !== oldState.settings.tempoRange) {
+            const range = newState.settings.tempoRange;
+            [1, 2].forEach(id => {
+                this.decks[id].tempoSlider.min = -range;
+                this.decks[id].tempoSlider.max = range;
+            });
         }
-        const scale = canvas.height / 2 / Math.max(...filteredData);
-        ctx.fillStyle = '#3498db';
-        ctx.beginPath();
-        for (let i = 0; i < filteredData.length; i++) {
-            const val = filteredData[i] * scale;
-            ctx.fillRect(i, (canvas.height - val) / 2, 1, val);
+
+        if (!oldState || newState.settings.theme !== oldState.settings.theme) {
+            if (newState.settings.theme === 'dark') {
+                document.body.classList.add('pro-dark');
+                this.settings.modal.children[0].classList.remove('glass');
+            } else {
+                document.body.classList.remove('pro-dark');
+                this.settings.modal.children[0].classList.add('glass');
+            }
         }
     }
 
@@ -336,31 +448,130 @@ class UIEngine {
         ctx.fillRect(0, canvas.height - meterHeight, canvas.width, meterHeight);
     }
 
-    drawSpectrum() {
+    initWebGLSpectrum() {
         const canvas = this.master.spectrumCanvas;
-        const ctx = canvas.getContext('2d');
+        const gl = canvas.getContext('webgl');
+        if (!gl) return null;
+
+        // Shaders
+        const vsSource = `
+            attribute vec2 a_position;
+            void main() {
+                gl_Position = vec4(a_position, 0, 1);
+            }
+        `;
+        const fsSource = `
+            precision mediump float;
+            uniform vec4 u_color;
+            void main() {
+                gl_FragColor = u_color;
+            }
+        `;
+
+        const createShader = (gl, type, source) => {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            return shader;
+        };
+
+        const program = gl.createProgram();
+        gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+        gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        this.glProgram = program;
+        this.positionBuffer = gl.createBuffer();
+        
+        return gl;
+    }
+
+    drawSpectrum() {
         const analyser = audioEngine.analyser;
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
 
-        const loop = () => {
-            requestAnimationFrame(loop);
-            analyser.getByteFrequencyData(dataArray);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const barWidth = (canvas.width / bufferLength) * 2;
-            let x = 0;
-            for (let i = 0; i < bufferLength; i++) {
-                const barHeight = dataArray[i] / 2;
-                const r = 70 + (barHeight * 1.5);
-                const g = 100;
-                const b = 250 - barHeight;
-                ctx.fillStyle = `rgb(${r},${g},${b})`;
-                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                x += barWidth + 1;
+        if (!this.gl) {
+            // Fallback to Canvas 2D if WebGL fails
+            this.drawSpectrum2D(dataArray);
+            return;
+        }
+
+        const gl = this.gl;
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        const barWidth = 2.0 / bufferLength;
+        const now = performance.now();
+        const decay = 0.95; // Peak decay speed
+
+        for (let i = 0; i < bufferLength; i++) {
+            const value = dataArray[i] / 255.0; // 0 to 1
+            const x = -1.0 + (i * barWidth);
+            
+            // Peak Holding Logic
+            if (value >= this.peaks[i]) {
+                this.peaks[i] = value;
+                this.peakHoldValues[i] = 1.0; 
+            } else {
+                this.peaks[i] *= decay;
             }
-        };
-        loop();
+
+            // Draw Bar
+            this.drawGLRect(x, -1.0, barWidth * 0.8, value * 2.0, [0.2 + value, 0.4, 0.9 - value, 1.0]);
+            
+            // Draw Peak Line
+            if (this.peaks[i] > 0.01) {
+                this.drawGLRect(x, -1.0 + (this.peaks[i] * 2.0), barWidth * 0.8, 0.02, [1.0, 1.0, 1.0, 0.8]);
+            }
+        }
+    }
+
+    drawGLRect(x, y, width, height, color) {
+        const gl = this.gl;
+        const program = this.glProgram;
+        
+        const positionLocation = gl.getAttribLocation(program, "a_position");
+        const colorLocation = gl.getUniformLocation(program, "u_color");
+
+        const positions = new Float32Array([
+            x, y,
+            x + width, y,
+            x, y + height,
+            x, y + height,
+            x + width, y,
+            x + width, y + height,
+        ]);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+        gl.uniform4fv(colorLocation, color);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    drawSpectrum2D(dataArray) {
+        const canvas = this.master.spectrumCanvas;
+        const ctx = canvas.getContext('2d');
+        const bufferLength = dataArray.length;
+        
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const barWidth = (canvas.width / bufferLength) * 2;
+        let x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i] / 2;
+            const r = 70 + (barHeight * 1.5);
+            const g = 100;
+            const b = 250 - barHeight;
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            x += barWidth + 1;
+        }
     }
 }
 

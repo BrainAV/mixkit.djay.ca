@@ -37,8 +37,18 @@ export class StateManager {
         master: {
             volume: 1.0,
             crossfader: 0.0 // -1 (Deck 1) to 1 (Deck 2)
+        },
+        settings: {
+            tempoRange: 16, // +/- %
+            crossfaderCurve: 'linear', // 'linear' or 'power'
+            theme: 'glass', // 'glass' or 'dark'
+            latency: 20 // ms (visual/buffer hint)
         }
     };
+
+    constructor() {
+        this.loadSettings();
+    }
 
     // Store AudioBuffers outside the serializable state
     #audioBuffers = {
@@ -160,6 +170,39 @@ export class StateManager {
         const oldState = this.getState();
         this.#state.master.volume = parseFloat(value);
         this.notify(oldState);
+    }
+
+    // --- Settings Setters ---
+
+    setSetting(key, value) {
+        const oldState = this.getState();
+        if (this.#state.settings[key] !== undefined) {
+            this.#state.settings[key] = value;
+            this.saveSettings();
+            this.notify(oldState);
+        }
+    }
+
+    // --- Persistence ---
+
+    saveSettings() {
+        try {
+            localStorage.setItem('mixkit_settings', JSON.stringify(this.#state.settings));
+        } catch (e) {
+            console.error('Failed to save settings:', e);
+        }
+    }
+
+    loadSettings() {
+        try {
+            const saved = localStorage.getItem('mixkit_settings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                this.#state.settings = { ...this.#state.settings, ...parsed };
+            }
+        } catch (e) {
+            console.error('Failed to load settings:', e);
+        }
     }
 
     // --- Session Export/Import ---

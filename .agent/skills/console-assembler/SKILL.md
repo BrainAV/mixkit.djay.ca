@@ -10,7 +10,8 @@ You are a DJ Console UI Engineer. Use this skill to ensure the MixKit's visual i
 1.  **Parallel Alignment**: When implementing waveforms, always support a mode where Deck 1 and Deck 2 waveforms are stacked or placed next to each other for visual beat-matching.
 2.  **Vertical Orientations**: Support vertical waveform scrolling (moving from bottom to top or top to bottom) alongside the standard horizontal view.
 3.  **Interactive Scrubbing**: Support direct mouse/touch interaction on the waveform canvas. Dragging should trigger "Stutter Play" audio feedback when paused.
-4.  **High-Contrast Markers**: Highlight transients, beat grid lines, and hot cue markers with high-contrast, vibrantly colored overlays.
+4.  **Visual Playhead**: Always render a high-contrast vertical line (Playhead) representing the current playback position. This must be updated via `requestAnimationFrame` for 60fps smoothness.
+5.  **High-Contrast Markers**: Highlight transients, beat grid lines, and hot cue markers with high-contrast, vibrantly colored overlays.
 
 ## 2. Component Layouts
 1.  **Unified Dashboard**: Group related controls (Tempo, Pitch, Volume) into logical "Dashing Boards" per deck.
