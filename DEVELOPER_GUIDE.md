@@ -51,11 +51,27 @@ The `AudioEngine` (in `js/audio-engine.js`) manages the Web Audio API graph.
 
 ## 🖌️ UI Engine & Rendering
 
-The `UIEngine` (in `js/ui.js`) handles all DOM elements and Canvas rendering.
+The `UIEngine` (in `js/ui.js`) handles all DOM elements and GPU-accelerated rendering.
 
--   **Waveforms**: Drawn once when a track is loaded.
--   **VU Meters**: Calculated in the `AudioEngine` and set in the state. The UI simply renders the current RMS values.
--   **Spectrum**: High-frequency loop drawing the master output.
+-   **WebGL Waveforms**: Rendered using vertex batches once loaded. Features a "Professional Imaging" animation.
+-   **WebGL VU Meters**: 60fps RMS metering using geometric batching (L/R channels per deck).
+-   **WebGL Spectrum**: High-frequency FFT analysis using a shared vertex buffer for bars and peaks.
+-   **Playheads**: High-contrast, hardware-style vertical markers drawn atop the waveforms.
+
+---
+
+## 🏎️ Performance Optimization (v0.2.0)
+
+To maintain a professional 60fps without "jank," we've implemented several advanced patterns:
+
+### 1. Geometric Batching
+Instead of making one `gl.drawArrays` call per bar (which would be thousands per frame), we consolidate all bars into a single large `Float32Array` (Vertex Buffer). This brings the overhead of a full dashboard refresh down to just a handful of draw calls.
+
+### 2. Zero-Allocation Hot loop
+All typed arrays (Vertex Buffers, FFT data) are pre-allocated in the constructor and reused. We never create new objects inside the `requestAnimationFrame` loop, which eliminates Garbage Collection (GC) pauses.
+
+### 3. Dynamic Resolution Sync
+The `UIEngine` automatically calculates the `clientWidth/Height` of each canvas and adjusts the internal WebGL resolution accordingly, ensuring pixel-perfect visuals on High-DPI (Retina) displays.
 
 ---
 

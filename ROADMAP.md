@@ -7,26 +7,26 @@ This document outlines the future enhancements and planned features for the DJay
 ### 1. Advanced Audio & Mixing Capabilities
 - [ ] **3-Band EQ per Channel:** Add dedicated High, Mid, and Low equalizer knobs with Web Audio API filters.
 - [ ] **Key-Lock / Pitch Correction:** Maintain the original musical key of a track when adjusting the playback tempo up or down (Master Tempo).
-- [ ] **Built-in Effects Processing:** Add Web Audio API nodes for effects such as Reverb, Delay, and Filter accessible directly from the deck controls, including visual knob feedback.
-- [x] **Stutter-Cueing & Pro Search:** Implement specialized audio feedback for scrubbing and CUE-point "chattering" (Professional Audio Feedback).
-- [x] **Momentary Pitch Bend (Nudge):** Add professional +/- pitch bend buttons for temporary speed adjustments during manual beat-matching.
-- [x] **Configurable Audio Settings:** Allow users to define audio latency and custom tempo ranges (e.g., +/- 8%, 16%, 50%).
-- [ ] **Recording:** Implement a feature to record the master output of the mix and save it directly as an audio file (`.wav` or `.mp3`) via the MediaRecorder API.
+- [ ] **Built-in Effects Processing:** Add Web Audio API nodes for effects such as Reverb, Delay, and Filter accessible directly from the deck controls.
+- [x] **Professional Visual Feedback (WebGL)**: Stereo LED-style VU meters and high-definition waveform overlays with real-time playheads.
+- [x] **Progressive Waveform Rendering**: GPU-accelerated "Imaging" draws the waveform progressively as it's decoded.
+- [x] **Stutter-Cueing & Pro Search:** Specialized audio feedback for scrubbing and CUE-point "chattering".
+- [x] **Momentary Pitch Bend (Nudge):** Professional +/- pitch bend buttons for temporary speed adjustments.
+- [x] **Configurable Audio Settings:** User-defined audio latency and custom tempo ranges (+/- 8%, 16%, 50%).
+- [ ] **Recording:** Implement master output recording to `.wav` via MediaRecorder API.
+- [x] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles).
+- [x] **Persistent Settings (localStorage):** Remember the user's settings, custom crossfader curves, and visual preferences across browser sessions.
 
 ### 2. User Interface & Experience
 - [ ] **Serato-Style Pro UI Overlay:** Transform the interface to support parallel/stacked and **vertical parallel waveforms**, prioritizing high-visibility beat-alignment and a unified deck dashboard.
 - [ ] **Jog Wheels:** Introduce interactive jog wheels for track scrubbing/scratching, featuring center-aligned album art inspired by professional controllers.
 - [ ] **Hot Cues:** Add assignable Hot Cue buttons (1-8) for jumping to specific markers within a track.
-- [ ] **Professional Visual Feedback:** Upgrade the VU meters to stereo LED-style readouts and refine the waveform overlays (playheads, cue markers).
-- [ ] **Progressive Waveform Rendering:** Draw the waveform data in real-time as the file is decoded/buffered, rather than waiting for the full decode to complete.
-- [x] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles).
-- [x] **Persistent Settings (localStorage):** Remember the user's settings, custom crossfader curves, and visual preferences across browser sessions.
 - [ ] **Mobile-Friendly UI Revamp (Phase 1):**
     - **Adaptive Layouts:** Automatically switch between side-by-side (tablet/desktop) and stacked (phone) deck views.
     - **Touch-Optimized Controls:** Increase tap target sizes for Play/CUE/Sync buttons (min 44x44px per WCAG).
     - **Bottom-Sheet Settings:** Move complex mixer and application settings into a slide-up gesture-aware modal.
     - **Gesture Support:** Implement long-press for hot cue assignment and vertical swipes for library navigation.
-    - **Pinch-to-Zoom Waveforms:** Allow users to adjust the visual zoom level of the waveform via multi-touch gestures.
+- [ ] **Pinch-to-Zoom Waveforms:** Allow users to adjust the visual zoom level of the waveform via multi-touch gestures.
 - [x] **Dark Mode / Console Theming:** Provide a "Pro Dark" theme toggle alongside our glassmorphism aesthetics, utilizing high-contrast hardware layouts.
 
 ### 3. Track Management & Workflow
@@ -43,11 +43,13 @@ This document outlines the future enhancements and planned features for the DJay
 ## 🔮 Future Goals & Icebox
 - [ ] **Advanced Beat-Matching & Tempo Sync:** Research robust automatic BPM detection and 'SYNC' logic (currently low priority).
 
-## 🛠 Active Technical Improvements
-- [ ] **GPU-Accelerated Rendering (WebGL/WebGPU):** Transition from Canvas 2D to WebGL for high-frequency waveform and spectrum rendering to reduce CPU overhead and support thousands of vertex points.
-- [x] **High-Definition Spectrum Analyzer:** Use WebGL shaders for the Master Spectrum to allow for smooth 60fps gradients and peak-holding visualizations.
-- [ ] **Performance Monitoring Overlay:** Add an optional FPS/CPU/Memory usage overlay (similar to `stats.js`) for real-time performance auditing.
-- [ ] **Offscreen Canvas Workers:** Offload heavy waveform calculation and rendering to Web Workers to keep the main thread fluid for audio and UI events.
+### 4. Technical Infrastructure & Performance
+- [x] **GPU-Accelerated Rendering (WebGL 2.0)**: Transition from Canvas 2D to WebGL for high-frequency waveforms, meters, and spectrum rendering.
+- [x] **Geometric Batching**: Consolidated draw calls to reduce CPU/GPU overhead by ~99%.
+- [x] **Zero-Allocation Rendering Pipeline**: High-performance loops using pre-allocated typed array buffers to eliminate GC jank.
+- [ ] **Offscreen Canvas Workers**: Offload heavy rendering to Web Workers for ultra-stable UI.
+- [ ] **MIDI Controller Support**: Universal mapping for physical DJ hardware via Web MIDI API.
+- [ ] **Performance Monitoring Overlay**: Optional FPS/CPU/Memory usage overlay for real-time auditing.
 - [ ] Refactor Web Audio API context usage to ensure peak efficiency across multiple decks and a single analyzer.
 - [ ] Adopt stricter ESLint and Prettier rules for the codebase.
 
