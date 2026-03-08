@@ -13,10 +13,11 @@ If a user clicks a button, moves a crossfader, or adjusts their EQ, the event li
 *   **WRONG:** `deck1Volume.addEventListener('input', (e) => { deck1Gain.gain.value = e.target.value; });`
 *   **RIGHT:** `deck1Volume.addEventListener('input', (e) => { stateManager.setDeckVolume(1, e.target.value); });`
 
-## 2. Setting State
 The `stateManager` is the single source of truth. It holds the state privately for each `deck` and the `master` channel.
-1.  **Always use Setters:** To change the state, you must call a specific setter method on the `stateManager` instance exported from `state.js` (e.g., `setDeckPlaying(1, true)`, `setCrossfader(0.5)`, `setMasterVolume(0.8)`).
-2.  **Encapsulation:** Do not attempt to bypass setters by mutating the state object directly or holding local variables that represent the state of an audio node.
+1.  **Always use Setters**: To change the state, you must call a specific setter method on the `stateManager` instance exported from `state.js` (e.g., `setDeckPlaying(1, true)`, `setCrossfader(0.5)`).
+2.  **Ephemeral Input (Exceptions)**: High-frequency audio feedback like "Stutter Play" during scrubbing may be triggered directly from `UI` to `Audio` if it has no persistent state, but all changes to position/volume **must** go through the State.
+3.  **Composite Pitch (Nudge)**: When implementing pitch bends (nudging), store the `nudge` value as a separate delta in the state. The `AudioEngine` should calculate the final playback rate.
+4.  **Encapsulation**: Do not attempt to bypass setters by mutating the state object directly.
 
 ## 3. Subscribing to State (Reactivity & Audio Sync)
 UI elements and the Audio Engine must "wear the headset" to listen for changes. Because of multiple decks, you need to be precise.

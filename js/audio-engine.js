@@ -137,6 +137,31 @@ class AudioEngine {
         if (!oldState || newState.master.volume !== oldState.master.volume) {
             this.masterGain.gain.value = newState.master.volume;
         }
+
+        // Nudge (Temporary Pitch Shift)
+        [1, 2].forEach(deckId => {
+            const nudge = newState.decks[deckId].nudge || 0;
+            const oldNudge = oldState ? (oldState.decks[deckId].nudge || 0) : 0;
+            if (nudge !== oldNudge && this.decks[deckId].sourceNode) {
+                const basePitch = newState.decks[deckId].pitch;
+                this.decks[deckId].sourceNode.playbackRate.value = basePitch + nudge;
+            }
+        });
+    }
+
+    playStutter(deckId, offset, duration = 0.05) {
+        this.resumeContext();
+        const buffer = stateManager.getAudioBuffer(deckId);
+        if (!buffer) return;
+
+        const stutterSource = this.audioCtx.createBufferSource();
+        stutterSource.buffer = buffer;
+        stutterSource.connect(this.decks[deckId].gainNode);
+        
+        const pitch = stateManager.getState().decks[deckId].pitch;
+        stutterSource.playbackRate.value = pitch;
+        
+        stutterSource.start(0, offset % buffer.duration, duration);
     }
 
     playDeck(deckId, deckState) {

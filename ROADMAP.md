@@ -8,18 +8,20 @@ This document outlines the future enhancements and planned features for the DJay
 - [ ] **3-Band EQ per Channel:** Add dedicated High, Mid, and Low equalizer knobs with Web Audio API filters.
 - [ ] **Key-Lock / Pitch Correction:** Maintain the original musical key of a track when adjusting the playback tempo up or down (Master Tempo).
 - [ ] **Built-in Effects Processing:** Add Web Audio API nodes for effects such as Reverb, Delay, and Filter accessible directly from the deck controls, including visual knob feedback.
+- [ ] **Stutter-Cueing & Pro Search:** Implement specialized audio feedback for scrubbing and CUE-point "chattering" (Professional Audio Feedback).
+- [ ] **Momentary Pitch Bend (Nudge):** Add professional +/- pitch bend buttons for temporary speed adjustments during manual beat-matching.
 - [ ] **Configurable Audio Settings:** Allow users to define audio latency and custom tempo ranges (e.g., +/- 8%, 16%, 50%).
 - [ ] **Recording:** Implement a feature to record the master output of the mix and save it directly as an audio file (`.wav` or `.mp3`) via the MediaRecorder API.
 
 ### 2. User Interface & Experience
-- [ ] **Serato-Style Pro UI Overlay:** Transform the interface to support parallel/stacked and **vertical parallel waveforms** (as seen in `dj.app`), prioritizing high-visibility beat-alignment and a unified deck dashboard.
+- [ ] **Serato-Style Pro UI Overlay:** Transform the interface to support parallel/stacked and **vertical parallel waveforms**, prioritizing high-visibility beat-alignment and a unified deck dashboard.
 - [ ] **Jog Wheels:** Introduce interactive jog wheels for track scrubbing/scratching, featuring center-aligned album art inspired by professional controllers.
 - [ ] **Hot Cues:** Add assignable Hot Cue buttons (1-8) for jumping to specific markers within a track.
 - [ ] **Professional Visual Feedback:** Upgrade the VU meters to stereo LED-style readouts and refine the waveform overlays (playheads, cue markers).
 - [ ] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles).
 - [ ] **Persistent Settings (localStorage):** Remember the user's settings, custom crossfader curves, and visual preferences across browser sessions.
 - [ ] **Mobile-Friendly UI Overhaul:** Improve the layout for tablets and mobile devices with larger touch targets and a responsive, potentially stackable two-deck view.
-- [ ] **Dark Mode / Console Theming:** Extract the dark "Panel Surface" and "Component Background" aesthetics from our console prototypes to provide a "Pro Dark" theme alongside our glassmorphism aesthetics.
+- [ ] **Dark Mode / Console Theming:** Provide a "Pro Dark" theme toggle alongside our glassmorphism aesthetics, utilizing high-contrast hardware layouts.
 
 ### 3. Track Management & Workflow
 - [ ] **Playlist & Autoplay:** Introduce a playlist queue manager that supports drag-and-drop reordering, folder imports, and a dedicated 'Automix' button for hands-free transitions.

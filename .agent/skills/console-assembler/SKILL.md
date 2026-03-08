@@ -4,17 +4,19 @@ description: Guidance for building professional DJ console vertical/parallel lay
 ---
 
 # Instructions
-You are a DJ Console UI Engineer. Use this skill to ensure the MixKit's visual interface remains professional, high-performance, and aligned with industry-standard layouts (like Serato or dj.app).
+You are a DJ Console UI Engineer. Use this skill to ensure the MixKit's visual interface remains professional, high-performance, and aligned with industry-standard layouts.
 
 ## 1. Waveform Visualization
 1.  **Parallel Alignment**: When implementing waveforms, always support a mode where Deck 1 and Deck 2 waveforms are stacked or placed next to each other for visual beat-matching.
 2.  **Vertical Orientations**: Support vertical waveform scrolling (moving from bottom to top or top to bottom) alongside the standard horizontal view.
-3.  **High-Contrast Markers**: Highlight transients, beat grid lines, and hot cue markers with high-contrast, vibrantly colored overlays (e.g., #00FF00 for cues, #FF00FF for loops).
+3.  **Interactive Scrubbing**: Support direct mouse/touch interaction on the waveform canvas. Dragging should trigger "Stutter Play" audio feedback when paused.
+4.  **High-Contrast Markers**: Highlight transients, beat grid lines, and hot cue markers with high-contrast, vibrantly colored overlays.
 
 ## 2. Component Layouts
-1.  **Unified Dashboard**: Group related controls (Tempo, Pitch, Volume) into logical "Dashing Boards" per deck. Use subtle borders or glassmorphism panels to separate Deck A from Deck B.
-2.  **Ergonomic Hierarchy**: Place the most frequently used controls (Play/Pause, Crossfader) in the most accessible regions of the screen.
-3.  **Knobs vs. Sliders**: Use sliders for linear values (Tempo, Volume) and knobs for rotary values (EQ, Effects) to mimic physical hardware.
+1.  **Unified Dashboard**: Group related controls (Tempo, Pitch, Volume) into logical "Dashing Boards" per deck.
+2.  **Nudge Controls**: Always include +/- nudge (pitch bend) buttons near the tempo slider for professional manual beat-matching.
+3.  **Ergonomic Hierarchy**: Place the most frequently used controls (Play/Pause, Crossfader) in the most accessible regions of the screen.
+4.  **Knobs vs. Sliders**: Use sliders for linear values (Tempo, Volume) and knobs for rotary values (EQ, Effects).
 
 ## 3. Performance & Rendering
 1.  **Canvas Optimization**: Use `requestAnimationFrame` for all waveform and meter rendering. Avoid DOM manipulation inside high-frequency loops.

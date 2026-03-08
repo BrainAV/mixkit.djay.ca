@@ -59,9 +59,25 @@ The `UIEngine` (in `js/ui.js`) handles all DOM elements and Canvas rendering.
 
 ---
 
+---
+
+## 🎹 Professional Audio Features
+
+### Momentary Pitch Bend (Nudge)
+- **State**: Tracked via `nudge` property in each deck.
+- **Audio**: The `AudioEngine` subscription loop calculates the `playbackRate` as `basePitch + nudge`. Default value is `0`.
+- **UI**: Mouse events (`mousedown`/`mouseup`) on the nudge buttons toggle the value between `0` and `+/- 0.05`.
+
+### Stutter-Cueing (Audio Feedback)
+- **Logic**: Implemented via `audioEngine.playStutter()`.
+- **Behavior**: Unlike the main playback loop, this is a "fire-and-forget" 50ms burst triggered directly from the `UIEngine` during scrubbing or CUE-point selection. It does not update the `isPlaying` state.
+
+---
+
 ## 🚀 Adding New Features
 
 ### Example: Adding a 3-Band EQ
 1.  **State**: Add `eq` properties to the deck objects in `js/state.js` with corresponding setters.
 2.  **Audio**: In `js/audio-engine.js`, create `BiquadFilterNode`s and insert them into the deck's node chain. Update their gain/frequency in the subscription loop.
 3.  **UI**: In `index.html`, add the knobs. In `js/ui.js`, add event listeners that call the new `stateManager` setters.
+

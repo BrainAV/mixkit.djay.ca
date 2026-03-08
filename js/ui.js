@@ -43,7 +43,9 @@ class UIEngine {
             tempoDisplay: document.getElementById(`tempo-display-${deckId}`),
             albumArtElement: document.getElementById(`album-art-${deckId}`),
             vuMeterL: document.getElementById(`vu-meter-L-${deckId}`),
-            vuMeterR: document.getElementById(`vu-meter-R-${deckId}`)
+            vuMeterR: document.getElementById(`vu-meter-R-${deckId}`),
+            nudgeUpBtn: document.getElementById(`nudge-up-${deckId}`),
+            nudgeDownBtn: document.getElementById(`nudge-down-${deckId}`)
         };
     }
 
@@ -89,6 +91,15 @@ class UIEngine {
             elements.volumeSlider.addEventListener('input', (e) => stateManager.setDeckVolume(deckId, e.target.value));
             elements.tempoSlider.addEventListener('input', (e) => stateManager.setDeckTempo(deckId, e.target.value));
 
+            // Nudge (Pitch Bend)
+            const handleNudge = (val) => stateManager.setDeckNudge(deckId, val);
+            elements.nudgeUpBtn.addEventListener('mousedown', () => handleNudge(0.05));
+            elements.nudgeDownBtn.addEventListener('mousedown', () => handleNudge(-0.05));
+            elements.nudgeUpBtn.addEventListener('mouseup', () => handleNudge(0));
+            elements.nudgeDownBtn.addEventListener('mouseup', () => handleNudge(0));
+            elements.nudgeUpBtn.addEventListener('mouseleave', () => handleNudge(0));
+            elements.nudgeDownBtn.addEventListener('mouseleave', () => handleNudge(0));
+
             // Scrubbing
             let isScrubbing = false;
             elements.progressContainer.addEventListener('mousedown', (e) => {
@@ -103,6 +114,19 @@ class UIEngine {
                     isScrubbing = false;
                     this.seekTooltip.style.display = 'none';
                 }
+            });
+
+            // Waveform Interaction
+            let isWaveformDragging = false;
+            elements.waveformCanvas.addEventListener('mousedown', (e) => {
+                isWaveformDragging = true;
+                this.handleScrubbing(deckId, e, true, true);
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (isWaveformDragging) this.handleScrubbing(deckId, e, true, true);
+            });
+            window.addEventListener('mouseup', () => {
+                isWaveformDragging = false;
             });
         });
 
@@ -152,8 +176,9 @@ class UIEngine {
         }
     }
 
-    handleScrubbing(deckId, event, updateState) {
-        const rect = this.decks[deckId].progressContainer.getBoundingClientRect();
+    handleScrubbing(deckId, event, updateState, fromWaveform = false) {
+        const container = fromWaveform ? this.decks[deckId].waveformCanvas : this.decks[deckId].progressContainer;
+        const rect = container.getBoundingClientRect();
         const percent = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
         const duration = stateManager.getState().decks[deckId].duration;
         const seekTime = percent * duration;
@@ -165,6 +190,10 @@ class UIEngine {
 
         if(updateState) {
             stateManager.setDeckCurrentTime(deckId, seekTime);
+            // Stutter feedback if paused or explicitly requested
+            if (!stateManager.getState().decks[deckId].isPlaying) {
+                audioEngine.playStutter(deckId, seekTime);
+            }
         }
     }
 

@@ -346,3 +346,33 @@ progress {
     height: 50px;
     box-sizing: border-box;
 }
+
+.nudge-controls {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.nudge-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.1s;
+    user-select: none;
+}
+
+.nudge-btn:active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.nudge-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}

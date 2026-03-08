@@ -12,6 +12,7 @@ export class StateManager {
                 volume: 1.0,
                 tempoPercentage: 0.0,
                 pitch: 1.0,
+                nudge: 0.0,
                 rmsL: 0,
                 rmsR: 0,
                 isLoading: false
@@ -27,6 +28,7 @@ export class StateManager {
                 volume: 1.0,
                 tempoPercentage: 0.0,
                 pitch: 1.0,
+                nudge: 0.0,
                 rmsL: 0,
                 rmsR: 0,
                 isLoading: false
@@ -124,6 +126,18 @@ export class StateManager {
         const oldState = this.getState();
         this.#state.decks[deckId].tempoPercentage = parseFloat(tempoPercentage);
         this.#state.decks[deckId].pitch = 1.0 + (parseFloat(tempoPercentage) / 100.0);
+        this.notify(oldState);
+    }
+
+    setDeckProgress(deckId, progress) {
+        const oldState = this.getState();
+        this.#state.decks[deckId].progress = progress;
+        this.notify(oldState);
+    }
+
+    setDeckNudge(deckId, value) {
+        const oldState = this.getState();
+        this.#state.decks[deckId].nudge = value;
         this.notify(oldState);
     }
 
