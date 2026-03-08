@@ -22,29 +22,39 @@ A lightweight, browser‑only DJ toolkit that lives entirely in your local machi
 
 ---
 
+### Architecture
+
+The application is built using a modular ES6 architecture, leveraging a centralized State Management pattern to decouple the UI from the Audio Engine.
+
+-   **`js/state.js`**: The single source of truth. Manages all application state (decks, mixer, metadata) and handles persistence/session logic.
+-   **`js/audio-engine.js`**: Manages the Web Audio API graph. Subscribes to the state to update audio nodes (gain, playback rate, filters) in real-time.
+-   **`js/ui.js`**: Handles all DOM interactions, canvas rendering (waveforms, VU meters), and event listeners. Publishes user actions to the State Manager.
+-   **`js/main.js`**: Coordinates the initialization and bootstrapping of the modules.
+
+---
+
 ### How It Works
 
-1. **Load the App**  
-   - Open `index.html` in any modern browser (Chrome, Edge, Firefox, Safari).
+1.  **Initialize**
+    -   Opening `index.html` bootstraps the modules. The `AudioEngine` initializes the `AudioContext` only after the first user interaction.
 
-2. **Add Tracks**  
-   - Click “Browse” on a deck to select an audio file from your hard drive.
+2.  **Add Tracks**
+    -   Choose files via "Browse" or drag-and-drop into a deck. The `UIEngine` reads metadata via `jsmediatags` and triggers the `AudioEngine` to decode the buffer.
 
-3. **Mix & Play**  
-   - Use the deck controls for each track. The app keeps a single `AudioContext` and routes audio through gain nodes, enabling smooth volume changes and crossfades.
+3.  **Mix & Play**
+    -   Actions like Play, Loop, and Volume changes are sent to the `StateManager`. All components subscribe to these changes, ensuring the UI and Audio remain perfectly synced.
 
-4. **Save Your Session**  
-   - Click “Export” → choose a name → save the JSON file. Load it later with “Import”.
+4.  **Save Your Session**
+    -   "Export" captures the current `StateManager` state into a JSON file for later "Import".
 
 ---
 
 ### Technical Highlights
 
-- **Pure HTML/CSS/JS** – No frameworks, no build step.
-- **Web Audio API** – Full control over audio decoding, mixing, and effects.
-- **File API** – Reads local files securely without any server‑side code.
-- **jsmediatags Library** – Uses a bundled third-party library to read ID3 metadata from MP3 files.
-- **Responsive UI** – Works on desktops and tablets.
+-   **Modular vanilla JS** – No frameworks or build steps; uses native ES6 modules.
+-   **Advanced State Management** – Uses a reactive Pub/Sub architecture for robust, scalable feature development.
+-   **Web Audio API** – High-performance audio processing and analysis.
+-   **Responsive Design** – Premium glassmorphism aesthetic tailored for desktop and mobile.
 
 ---
 
