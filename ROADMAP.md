@@ -6,13 +6,13 @@ This document outlines the future enhancements and planned features for the DJay
 
 ### 1. Advanced Audio & Mixing Capabilities
 - [ ] **3-Band EQ per Channel:** Add dedicated High, Mid, and Low equalizer knobs with Web Audio API filters.
-- [ ] **Advanced Beat-Matching & Tempo Sync:** Implement automatic BPM detection to allow seamless beat-matching between tracks, along with a 'SYNC' button feature.
 - [ ] **Key-Lock / Pitch Correction:** Maintain the original musical key of a track when adjusting the playback tempo up or down (Master Tempo).
 - [ ] **Built-in Effects Processing:** Add Web Audio API nodes for effects such as Reverb, Delay, and Filter accessible directly from the deck controls, including visual knob feedback.
 - [ ] **Configurable Audio Settings:** Allow users to define audio latency and custom tempo ranges (e.g., +/- 8%, 16%, 50%).
 - [ ] **Recording:** Implement a feature to record the master output of the mix and save it directly as an audio file (`.wav` or `.mp3`) via the MediaRecorder API.
 
 ### 2. User Interface & Experience
+- [ ] **Serato-Style Pro UI Overlay:** Transform the interface to support parallel/stacked and **vertical parallel waveforms** (as seen in `dj.app`), prioritizing high-visibility beat-alignment and a unified deck dashboard.
 - [ ] **Jog Wheels:** Introduce interactive jog wheels for track scrubbing/scratching, featuring center-aligned album art inspired by professional controllers.
 - [ ] **Hot Cues:** Add assignable Hot Cue buttons (1-8) for jumping to specific markers within a track.
 - [ ] **Professional Visual Feedback:** Upgrade the VU meters to stereo LED-style readouts and refine the waveform overlays (playheads, cue markers).
@@ -29,6 +29,11 @@ This document outlines the future enhancements and planned features for the DJay
 
 ## 🏗️ Major Architectural Overhaul
 - [ ] **Advanced State Management (Pub/Sub Pattern):** Refactor the tightly coupled `app.js` into modular components (`state.js`, `audio-engine.js`, `ui.js`). Implement a centralized store to independently manage the state of multiple decks, the master mixer, and visualizations. This will decouple the DOM from the Audio Engine.
+
+---
+
+## 🔮 Future Goals & Icebox
+- [ ] **Advanced Beat-Matching & Tempo Sync:** Research robust automatic BPM detection and 'SYNC' logic (currently low priority).
 
 ## 🛠 Active Technical Improvements
 - [ ] Refactor Web Audio API context usage to ensure peak efficiency across multiple decks and a single analyzer.
