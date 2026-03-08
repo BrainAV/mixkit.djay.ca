@@ -125,12 +125,29 @@ class AudioEngine {
         });
 
         // Crossfader
-        if (!oldState || newState.master.crossfader !== oldState.master.crossfader) {
-            const value = newState.master.crossfader;
-            const gain1 = Math.cos((value + 1) * 0.25 * Math.PI);
-            const gain2 = Math.cos((1 - value) * 0.25 * Math.PI);
-            this.decks[1].crossfaderGainNode.gain.value = gain1;
-            this.decks[2].crossfaderGainNode.gain.value = gain2;
+        if (!oldState || newState.master.crossfader !== oldState.master.crossfader || newState.settings.crossfaderCurve !== oldState?.settings.crossfaderCurve) {
+            const fade = newState.master.crossfader; // -1 to 1
+            const curve = newState.settings.crossfaderCurve;
+            const normalized = (fade + 1) / 2; // 0 (Deck 1) to 1 (Deck 2)
+
+            let gainA, gainB;
+            if (curve === 'power') {
+                gainA = Math.cos(normalized * 0.5 * Math.PI);
+                gainB = Math.sin(normalized * 0.5 * Math.PI);
+            } else if (curve === 'logarithmic') {
+                gainA = Math.log10(1 + 9 * (1 - normalized));
+                gainB = Math.log10(1 + 9 * normalized);
+            } else if (curve === 'exponential') {
+                gainA = Math.pow(1 - normalized, 3);
+                gainB = Math.pow(normalized, 3);
+            } else {
+                // Linear
+                gainA = fade > 0 ? 1 - fade : 1;
+                gainB = fade < 0 ? 1 + fade : 1;
+            }
+
+            this.decks[1].crossfaderGainNode.gain.setTargetAtTime(gainA, this.audioCtx.currentTime, 0.01);
+            this.decks[2].crossfaderGainNode.gain.setTargetAtTime(gainB, this.audioCtx.currentTime, 0.01);
         }
 
         // Master Volume

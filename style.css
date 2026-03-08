@@ -83,8 +83,13 @@ h1, h2 {
 }
 
 canvas {
+    display: block;
     width: 100%;
     height: 100%;
+}
+
+.spectrum-canvas, .waveform-container {
+    overflow: hidden;
 }
 
 .time-display {

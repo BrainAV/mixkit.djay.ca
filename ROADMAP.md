@@ -8,9 +8,9 @@ This document outlines the future enhancements and planned features for the DJay
 - [ ] **3-Band EQ per Channel:** Add dedicated High, Mid, and Low equalizer knobs with Web Audio API filters.
 - [ ] **Key-Lock / Pitch Correction:** Maintain the original musical key of a track when adjusting the playback tempo up or down (Master Tempo).
 - [ ] **Built-in Effects Processing:** Add Web Audio API nodes for effects such as Reverb, Delay, and Filter accessible directly from the deck controls, including visual knob feedback.
-- [ ] **Stutter-Cueing & Pro Search:** Implement specialized audio feedback for scrubbing and CUE-point "chattering" (Professional Audio Feedback).
-- [ ] **Momentary Pitch Bend (Nudge):** Add professional +/- pitch bend buttons for temporary speed adjustments during manual beat-matching.
-- [ ] **Configurable Audio Settings:** Allow users to define audio latency and custom tempo ranges (e.g., +/- 8%, 16%, 50%).
+- [x] **Stutter-Cueing & Pro Search:** Implement specialized audio feedback for scrubbing and CUE-point "chattering" (Professional Audio Feedback).
+- [x] **Momentary Pitch Bend (Nudge):** Add professional +/- pitch bend buttons for temporary speed adjustments during manual beat-matching.
+- [x] **Configurable Audio Settings:** Allow users to define audio latency and custom tempo ranges (e.g., +/- 8%, 16%, 50%).
 - [ ] **Recording:** Implement a feature to record the master output of the mix and save it directly as an audio file (`.wav` or `.mp3`) via the MediaRecorder API.
 
 ### 2. User Interface & Experience
@@ -19,15 +19,15 @@ This document outlines the future enhancements and planned features for the DJay
 - [ ] **Hot Cues:** Add assignable Hot Cue buttons (1-8) for jumping to specific markers within a track.
 - [ ] **Professional Visual Feedback:** Upgrade the VU meters to stereo LED-style readouts and refine the waveform overlays (playheads, cue markers).
 - [ ] **Progressive Waveform Rendering:** Draw the waveform data in real-time as the file is decoded/buffered, rather than waiting for the full decode to complete.
-- [ ] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles). [DONE]
-- [ ] **Persistent Settings (localStorage):** Remember the user's settings, custom crossfader curves, and visual preferences across browser sessions.
+- [x] **Settings Modal / Overlay:** Create a dedicated settings modal with an overlay window to centralize application options (e.g., crossfader curves, default visualizations, theme toggles).
+- [x] **Persistent Settings (localStorage):** Remember the user's settings, custom crossfader curves, and visual preferences across browser sessions.
 - [ ] **Mobile-Friendly UI Revamp (Phase 1):**
     - **Adaptive Layouts:** Automatically switch between side-by-side (tablet/desktop) and stacked (phone) deck views.
     - **Touch-Optimized Controls:** Increase tap target sizes for Play/CUE/Sync buttons (min 44x44px per WCAG).
     - **Bottom-Sheet Settings:** Move complex mixer and application settings into a slide-up gesture-aware modal.
     - **Gesture Support:** Implement long-press for hot cue assignment and vertical swipes for library navigation.
     - **Pinch-to-Zoom Waveforms:** Allow users to adjust the visual zoom level of the waveform via multi-touch gestures.
-- [ ] **Dark Mode / Console Theming:** Provide a "Pro Dark" theme toggle alongside our glassmorphism aesthetics, utilizing high-contrast hardware layouts.
+- [x] **Dark Mode / Console Theming:** Provide a "Pro Dark" theme toggle alongside our glassmorphism aesthetics, utilizing high-contrast hardware layouts.
 
 ### 3. Track Management & Workflow
 - [ ] **Playlist & Autoplay:** Introduce a playlist queue manager that supports drag-and-drop reordering, folder imports, and a dedicated 'Automix' button for hands-free transitions.
@@ -36,7 +36,7 @@ This document outlines the future enhancements and planned features for the DJay
 - [ ] **MIDI Controller Support:** Integrate the Web MIDI API to allow users to control the application with physical DJ controllers (which is now trivial thanks to the robust pub/sub state manager).
 
 ## 🏗️ Major Architectural Overhaul
-- [ ] **Advanced State Management (Pub/Sub Pattern):** Refactor the tightly coupled `app.js` into modular components (`state.js`, `audio-engine.js`, `ui.js`). Implement a centralized store to independently manage the state of multiple decks, the master mixer, and visualizations. This will decouple the DOM from the Audio Engine.
+- [x] **Advanced State Management (Pub/Sub Pattern):** Refactor the tightly coupled `app.js` into modular components (`state.js`, `audio-engine.js`, `ui.js`). Implement a centralized store to independently manage the state of multiple decks, the master mixer, and visualizations. This will decouple the DOM from the Audio Engine.
 
 ---
 
@@ -45,7 +45,7 @@ This document outlines the future enhancements and planned features for the DJay
 
 ## 🛠 Active Technical Improvements
 - [ ] **GPU-Accelerated Rendering (WebGL/WebGPU):** Transition from Canvas 2D to WebGL for high-frequency waveform and spectrum rendering to reduce CPU overhead and support thousands of vertex points.
-- [ ] **High-Definition Spectrum Analyzer:** Use WebGL shaders for the Master Spectrum to allow for smooth 60fps gradients and peak-holding visualizations.
+- [x] **High-Definition Spectrum Analyzer:** Use WebGL shaders for the Master Spectrum to allow for smooth 60fps gradients and peak-holding visualizations.
 - [ ] **Performance Monitoring Overlay:** Add an optional FPS/CPU/Memory usage overlay (similar to `stats.js`) for real-time performance auditing.
 - [ ] **Offscreen Canvas Workers:** Offload heavy waveform calculation and rendering to Web Workers to keep the main thread fluid for audio and UI events.
 - [ ] Refactor Web Audio API context usage to ensure peak efficiency across multiple decks and a single analyzer.
