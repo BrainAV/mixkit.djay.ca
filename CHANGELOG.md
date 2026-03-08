@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Major Architectural Overhaul:** Refactored the core mechanism of `app.js` into modular pieces (`js/state.js`, `js/audio-engine.js`, `js/ui.js`, `js/main.js`). This implements the Advanced State Management (Pub/Sub) pattern, completely decoupling DOM mutations from the Audio Engine, ensuring future UI features (like Jog Wheels) can simply publish state updates.
 
-## [1.0.0] - Initial Release
+## [0.1.0] - Initial Release
 ### Added
 - DJay.ca MixKit (WEB) core functionality implemented.
 - Pure HTML/CSS/JS frontend logic and styling.
