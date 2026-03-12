@@ -5,6 +5,10 @@ All notable changes to the DJay.ca MixKit (WEB) project will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- **SEO - Canonical Tag**: Added `<link rel="canonical" href="https://mixkit.djay.ca/">` to `index.html` to resolve the "Duplicate without user-selected canonical" warning in Google Search Console caused by GitHub Pages serving both `index.html` and `/` as separate URLs.
+
 ## [0.2.0] - 2026-03-08
 ### Added
 - **Unified WebGL Visuals**:
